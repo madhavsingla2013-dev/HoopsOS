@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HoopsOS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Orbitron:wght@300;500&display=swap');
+
+  :root{
+    --bg-deep:#0c0e14;
+    --bg-panel:#171a24;
+    --bg-panel-2:#1f2430;
+    --bg-bar:rgba(15,17,25,0.85);
+    --accent:#ff7a29;
+    --accent-cream:#f2d8a7;
+    --accent-red:#e6484f;
+    --court-line:rgba(242,216,167,0.14);
+    --text-hi:#f3f0e8;
+    --text-lo:#8a8d9c;
+    --border:#2a2e3d;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    height:100dvh;
+    background:var(--bg-deep);
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--text-hi);
+    overflow:hidden;
+    user-select:none;
+  }
+
+  /* ---------- BOOT SCREEN ---------- */
+  #boot{position:fixed;inset:0;background:radial-gradient(circle at 50% 35%,rgba(255,122,41,.10),transparent 38%),var(--bg-deep);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOutBoot .7s ease 3.8s forwards}
+  .boot-panel{width:min(620px,calc(100vw - 32px));background:rgba(18,20,29,.94);border:1px solid var(--border);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.68),0 0 60px rgba(255,122,41,.08);overflow:hidden;backdrop-filter:blur(16px)}
+  .boot-brand{padding:26px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border)}
+  .boot-ball{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:31px;background:var(--accent);box-shadow:0 10px 30px rgba(255,122,41,.28);animation:bootBall 1.4s ease-in-out infinite}
+  .boot-brand h1{margin:0;font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;line-height:1}
+  .boot-brand p{margin:5px 0 0;color:var(--text-lo);font-size:11px;letter-spacing:1.2px}
+  .boot-titlebar{height:30px;background:var(--bg-panel-2);display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--border)}
+  .boot-titlebar span{width:9px;height:9px;border-radius:50%}.boot-titlebar .label{flex:1;text-align:center;font-size:10px;letter-spacing:2px;color:var(--text-lo);margin-right:30px}
+  #boot-log{height:150px;padding:14px 18px;font-size:11px;line-height:1.8;color:#9fd6ff;overflow:hidden;background:rgba(0,0,0,.12)}
+  #boot-log .ok{color:#6ee7b7}#boot-log .tag{color:var(--text-lo)}
+  .boot-progress{height:3px;background:#0d1018}.boot-progress-bar{height:100%;width:0;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:bootProgress 3.25s cubic-bezier(.2,.8,.2,1) forwards}
+  .boot-footer{padding:14px 18px;display:flex;align-items:center;gap:11px}.boot-ring{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);border-top-color:transparent;animation:spin .8s linear infinite;flex-shrink:0}.boot-footer .msg{font-size:11px;color:var(--text-lo);flex:1}.boot-percent{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent)}
+  @keyframes spin{to{transform:rotate(360deg)}}@keyframes bootBall{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(8deg)}}@keyframes bootProgress{to{width:100%}}@keyframes fadeOutBoot{to{opacity:0;visibility:hidden;pointer-events:none}}
+  @media(max-width:600px){.boot-brand{padding:20px}.boot-brand h1{font-size:28px}.boot-ball{width:48px;height:48px;font-size:25px}#boot-log{height:130px}}
+
+  /* ---------- LOCK SCREEN ---------- */
+  #lockscreen{
+    position:fixed; inset:0; z-index:9500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,122,41,0.14), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(45,212,191,0.10), transparent 45%),
+      repeating-linear-gradient(90deg, #14161f 0 3px, #101219 3px 42px),
+      var(--bg-deep);
+    opacity:1; visibility:visible; pointer-events:auto; cursor:pointer;
+  }
+  #lockscreen.hide{ opacity:0; visibility:hidden; pointer-events:none; transition: opacity 0.4s ease, visibility 0.4s ease; }
+  .lock-brand{ font-family:'Bebas Neue',sans-serif; letter-spacing:3px; color:var(--accent); font-size:18px; margin-bottom:18px; }
+  .lock-time{ font-family:'Bebas Neue',sans-serif; font-size:96px; color:var(--text-hi); line-height:1; }
+  .lock-date{ font-size:13px; color:var(--text-lo); margin-top:4px; }
+  .lock-hint{
+    margin-top:34px; padding:10px 22px; border:1px solid var(--border); border-radius:30px;
+    background:var(--bg-panel); font-size:12px; letter-spacing:1px; color:var(--text-hi);
+    animation: lockPulse 2s ease-in-out infinite;
+  }
+  @keyframes lockPulse{ 0%,100%{ opacity:0.6; } 50%{ opacity:1; } }
+
+  /* ---------- TOP BAR ---------- */
+  #topbar{ position:fixed; top:0; left:0; right:0; height:34px; z-index:800; background:var(--bg-bar); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:space-between; padding:0 14px; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-hi); }
+  #topbar .left{ display:flex; align-items:center; gap:18px; }
+  #topbar .brand{ font-family:'Bebas Neue',sans-serif; letter-spacing:2px; color:var(--accent); font-size:15px; }
+  #topbar .menu-item{ color:var(--text-lo); cursor:pointer; position:relative; }
+  #topbar .menu-item:hover{ color:var(--text-hi); }
+  .menu-dropdown{
+    position:absolute; top:28px; left:0; min-width:170px; background:var(--bg-panel); border:1px solid var(--border);
+    border-radius:10px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:none; z-index:900;
+  }
+  .menu-dropdown.open{ display:block; }
+  .menu-dropdown .ctx-item{ font-size:12px; }
+  #topbar .right{ display:flex; align-items:center; gap:14px; color:var(--text-lo); }
+  .notif-bell{ position:relative; cursor:pointer; }
+  .notif-badge{ position:absolute; top:-6px; right:-8px; background:var(--accent-red); color:#fff; font-size:9px; border-radius:10px; padding:1px 5px; font-weight:700; }
+  #notif-panel{
+    position:fixed; top:34px; right:-320px; width:300px; height:calc(100dvh - 34px); z-index:9100;
+    background:rgba(23,26,36,0.92); backdrop-filter:blur(18px); border-left:1px solid var(--border);
+    transition: right 0.25s ease; padding:16px; overflow:auto;
+  }
+  #notif-panel.open{ right:0; }
+  .notif-header{ font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; margin-bottom:12px; }
+  .notif-item{ background:var(--bg-panel-2); border:1px solid var(--border); border-radius:8px; padding:10px; margin-bottom:8px; font-size:12px; }
+  .notif-item .notif-time{ font-size:10px; color:var(--text-lo); margin-top:3px; }
+  .notif-empty{ color:var(--text-lo); font-size:12px; text-align:center; margin-top:30px; }
+
+  /* ---------- SPOTLIGHT ---------- */
+  #spotlight-wrap{ position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:2; width:340px; }
+  #spotlight{ width:100%; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:9px 14px; color:var(--text-hi); font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+  #spotlight::placeholder{ color:var(--text-lo); }
+  #spotlight-results{ margin-top:6px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; display:none; }
+  #spotlight-results.open{ display:block; }
+  .spotlight-item{ padding:9px 14px; font-size:13px; cursor:pointer; }
+  .spotlight-item:hover{ background:rgba(255,255,255,0.07); }
+
+  /* ---------- DESKTOP ---------- */
+  #desktop{ position:fixed; inset:0; top:34px; bottom:0; padding:22px; padding-bottom:84px; }
+  .bg-layer{ position:absolute; inset:0; z-index:0; opacity:0; transition:opacity 0.6s ease; pointer-events:none; }
+  .bg-layer.active{ opacity:1; }
+
+  /* ---------- WIDGETS ---------- */
+  #widgets{ position:absolute; top:14px; right:14px; display:flex; flex-direction:column; gap:10px; width:170px; }
+  .widget{
+    background:linear-gradient(165deg, rgba(31,36,48,0.75), rgba(23,26,36,0.6));
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .widget .w-title{ font-size:10px; letter-spacing:1px; color:var(--text-lo); margin-bottom:6px; }
+  #widget-clock .time{ font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--text-hi); }
+  #widget-clock .date{ font-size:11px; color:var(--text-lo); }
+  .widget-clock-controls{ display:flex; gap:6px; margin-top:8px; }
+  .widget-clock-controls button{
+    flex:1; background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi);
+    border-radius:6px; padding:5px 0; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10px;
+  }
+  .widget-clock-controls button.primary{ background:var(--accent); color:#0c0e14; font-weight:700; border:none; }
+  .widget-clock-period{ font-size:10px; color:var(--text-lo); margin-top:4px; }
+  .widget-score-row{ display:flex; justify-content:space-between; align-items:center; font-family:'Bebas Neue',sans-serif; font-size:20px; }
+  .widget-score-row .vs{ font-size:12px; color:var(--text-lo); font-family:'IBM Plex Mono',monospace; }
+
+  /* ---------- ICONS ---------- */
+  .icon{
+    width:84px; display:flex; flex-direction:column; align-items:center; gap:7px; padding:10px 4px 8px; border-radius:12px; cursor:grab; position:absolute; z-index:1;
+    transition: transform 0.12s ease, background 0.15s ease;
+    background:rgba(10,12,20,0.32); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  .icon:active{ cursor:grabbing; transform:scale(0.94); }
+  .icon:hover{ background:rgba(10,12,20,0.5); }
+  .icon .glyph{
+    width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; pointer-events:none; position:relative;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -6px 10px rgba(0,0,0,0.15);
+    background-blend-mode: overlay;
+  }
+  .icon .glyph::after{
+    content:''; position:absolute; inset:0; border-radius:14px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 55%);
+    pointer-events:none;
+  }
+  .icon .label{ font-size:11px; color:var(--text-hi); text-align:center; pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,0.85); }
+
+  /* Icon size variants */
+  #desktop.icons-small .icon{ width:64px; }
+  #desktop.icons-small .icon .glyph{ width:34px; height:34px; font-size:15px; border-radius:10px; }
+  #desktop.icons-small .icon .label{ font-size:9.5px; }
+  #desktop.icons-medium .icon{ width:84px; }
+  #desktop.icons-large .icon{ width:108px; }
+  #desktop.icons-large .icon .glyph{ width:68px; height:68px; font-size:30px; border-radius:18px; }
+  #desktop.icons-large .icon .label{ font-size:12.5px; }
+  #rainmeter-clock{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    text-align:center; pointer-events:none; z-index:0; user-select:none;
+  }
+  #rainmeter-clock .rm-time{
+    font-family:'Orbitron', sans-serif; font-weight:300; font-size:96px; letter-spacing:6px;
+    color:rgba(243,240,232,0.85); text-shadow:0 0 30px rgba(255,122,41,0.25), 0 2px 12px rgba(0,0,0,0.5);
+  }
+  #rainmeter-clock .rm-date{
+    font-family:'Orbitron', sans-serif; font-weight:300; font-size:13px; letter-spacing:5px;
+    color:rgba(243,240,232,0.45); text-transform:uppercase; margin-top:6px;
+  }
+  #desktop.rainmeter-hidden #rainmeter-clock{ display:none; }
+  #icons{ position:absolute; inset:0; pointer-events:none; }
+  #icons .icon{ pointer-events:auto; }
+
+  /* ---------- MASCOT ---------- */
+  #mascot{ position:absolute; font-size:30px; z-index:5000; transition: left 4s ease-in-out, top 4s ease-in-out; filter:drop-shadow(0 6px 6px rgba(0,0,0,0.4)); }
+  #mascot.bounce-anim{ animation: mascotBounce 0.6s ease-in-out infinite; }
+  @keyframes mascotBounce{
+    0%, 100%{ transform: translateY(0) scale(1,1) rotate(var(--mascot-tilt, 0deg)); }
+    50%{ transform: translateY(-8px) scale(1.05,0.92) rotate(var(--mascot-tilt, 0deg)); }
+  }
+
+  /* ---------- WINDOWS ---------- */
+  .window{ position:absolute; z-index:1000; min-width:280px; min-height:180px; background:rgba(23,26,36,0.78); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:1px solid var(--border); border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,0.55); display:flex; flex-direction:column; overflow:hidden; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+  .window.focused{ border-color:rgba(255,122,41,0.5); box-shadow:0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,122,41,0.15), 0 0 24px rgba(255,122,41,0.12); }
+  .window.maximized{ left:0 !important; top:0 !important; width:100% !important; height:100% !important; border-radius:0; }
+  .window.closing{ animation: winClose 0.16s ease forwards; }
+  .window.opening{ animation: winOpen 0.18s ease; }
+  @keyframes winOpen{ from{ opacity:0; transform:scale(0.96) translateY(6px); } to{ opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes winClose{ from{ opacity:1; transform:scale(1); } to{ opacity:0; transform:scale(0.96); } }
+  .titlebar{ height:38px; background:rgba(31,36,48,0.6); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:space-between; padding:0 10px; cursor:grab; flex-shrink:0; border-bottom:1px solid var(--border); }
+  .titlebar:active{ cursor:grabbing; }
+  .titlebar .title{ font-family:'Bebas Neue', sans-serif; font-size:16px; letter-spacing:1px; color:var(--text-hi); display:flex; align-items:center; gap:8px; }
+  .titlebar .dot{ width:8px; height:8px; border-radius:50%; }
+  .win-controls{ display:flex; gap:8px; }
+  .win-btn{ width:16px; height:16px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:9px; color:#0c0e14; font-weight:700; }
+  .win-btn.min{ background:var(--accent-cream); }
+  .win-btn.max{ background:#6ee7b7; }
+  .win-btn.close{ background:var(--accent-red); }
+  .win-body{ flex:1; padding:14px; overflow:auto; color:var(--text-hi); font-size:13px; line-height:1.5; }
+  .resize-handle{ position:absolute; right:0; bottom:0; width:16px; height:16px; cursor:nwse-resize; }
+  .resize-handle.edge-e{ right:0; top:38px; bottom:16px; left:auto; width:6px; height:auto; cursor:ew-resize; }
+  .resize-handle.edge-s{ left:0; right:16px; bottom:0; top:auto; height:6px; width:auto; cursor:ns-resize; }
+
+  #notes-textarea{ width:100%; height:100%; resize:none; background:#0e1017; color:var(--text-hi); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+
+  .score-wrap{ display:flex; gap:16px; justify-content:center; align-items:center; margin-top:6px; }
+  .score-team{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .score-team input{ width:90px; text-align:center; background:transparent; border:none; color:var(--text-hi); font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:1px; }
+  .score-num{ font-family:'Bebas Neue',sans-serif; font-size:52px; color:var(--accent); background:#0e1017; border:1px solid var(--border); border-radius:10px; padding:6px 18px; min-width:80px; text-align:center; }
+  .score-btns{ display:flex; gap:6px; }
+  .score-btns button{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:6px; padding:4px 10px; cursor:pointer; font-family:'IBM Plex Mono',monospace; }
+  .score-divider{ font-family:'Bebas Neue',sans-serif; font-size:40px; color:var(--text-lo); }
+  .score-reset{ display:block; margin:16px auto 0; background:var(--accent-red); border:none; color:#fff; padding:8px 16px; border-radius:8px; cursor:pointer; font-family:'IBM Plex Mono',monospace; }
+
+  .shotclock-display{ font-family:'Bebas Neue',sans-serif; font-size:72px; text-align:center; color:var(--accent); background:#0e1017; border:1px solid var(--border); border-radius:12px; padding:10px; margin-top:6px; }
+  .shotclock-btns{ display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  .shotclock-btns button{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:8px; padding:8px 14px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .shotclock-btns button.primary{ background:var(--accent); color:#0c0e14; font-weight:700; border:none; }
+  .clock-tabs{ display:flex; gap:6px; margin-bottom:10px; }
+  .clock-tab{ flex:1; text-align:center; padding:7px 0; border-radius:8px; background:var(--bg-panel-2); border:1px solid var(--border); font-size:11px; cursor:pointer; color:var(--text-lo); }
+  .clock-tab.active{ background:rgba(255,122,41,0.15); border-color:var(--accent); color:var(--text-hi); }
+  .timer-set-row{ display:flex; gap:6px; justify-content:center; align-items:center; margin-top:10px; }
+  .timer-set-row input{ width:50px; background:#0e1017; border:1px solid var(--border); color:var(--text-hi); border-radius:6px; padding:5px; text-align:center; font-family:'IBM Plex Mono',monospace; }
+
+  /* Calculator */
+  .calc-screen{ background:#0e1017; border:1px solid var(--border); border-radius:8px; padding:10px; font-family:'Bebas Neue',sans-serif; font-size:26px; text-align:right; margin-bottom:6px; min-height:36px; }
+  .calc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .calc-btn{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:8px; padding:10px 0; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  .calc-btn:hover{ background:#262c4d; }
+  .calc-btn.op{ color:var(--accent); }
+  .calc-btn.eq{ background:var(--accent); color:#0c0e14; font-weight:700; }
+
+  /* Stat Tracker */
+  .stat-row{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); }
+  .stat-row:last-child{ border-bottom:none; }
+  .stat-name{ font-size:13px; }
+  .stat-controls{ display:flex; align-items:center; gap:10px; }
+  .stat-num{ font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); min-width:24px; text-align:center; }
+  .stat-controls button{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:6px; width:24px; height:24px; cursor:pointer; }
+  .stat-reset{ display:block; margin:14px auto 0; background:var(--accent-red); border:none; color:#fff; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+
+  /* Schedule */
+  .sched-item{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .sched-item:last-child{ border-bottom:none; }
+  .sched-item .opp{ font-weight:700; }
+  .sched-item .when{ color:var(--text-lo); }
+  .sched-row{ display:flex; align-items:center; gap:6px; padding:7px 0; border-bottom:1px solid var(--border); }
+  .sched-row:last-child{ border-bottom:none; }
+  .sched-row input{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:6px; padding:5px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; }
+  .sched-row .sched-opp{ flex:1.4; min-width:0; }
+  .sched-row .sched-when{ flex:1; min-width:0; }
+  .sched-row button{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--accent-red); border-radius:6px; width:22px; height:22px; cursor:pointer; flex-shrink:0; }
+  .sched-add{ display:block; margin:12px auto 0; background:var(--accent); border:none; color:#0c0e14; font-weight:700; padding:6px 16px; border-radius:8px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+
+  /* Hall of Fame */
+  .gallery-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .player-card{ background:var(--bg-panel-2); border:1px solid var(--border); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition:transform 0.15s ease; }
+  .player-card:hover{ transform:translateY(-3px); border-color:var(--accent); }
+  .player-avatar{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 6px; display:block;
+    object-fit:cover; object-position:center top; background:var(--bg-panel);
+    border:2px solid var(--border); box-sizing:border-box;
+  }
+  .player-name{ font-size:10.5px; color:var(--text-hi); font-weight:700; }
+  .player-team{ font-size:9px; color:var(--text-lo); margin-top:2px; }
+  .gallery-detail{ margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:12px; color:var(--text-lo); text-align:center; min-height:18px; }
+
+  /* Watch */
+  .watch-layout{ display:flex; height:100%; gap:10px; margin:-14px; padding:14px; }
+  .watch-list{ width:150px; flex-shrink:0; overflow:auto; display:flex; flex-direction:column; gap:6px; }
+  .watch-item{ background:var(--bg-panel-2); border:1px solid var(--border); border-radius:8px; padding:8px; cursor:pointer; font-size:11px; }
+  .watch-item:hover{ border-color:var(--accent); }
+  .watch-item.active{ border-color:var(--accent); background:rgba(255,122,41,0.1); }
+  .watch-player{ flex:1; display:flex; flex-direction:column; }
+  .watch-player iframe{ width:100%; flex:1; border:none; border-radius:8px; background:#000; }
+  .watch-title{ font-size:11px; color:var(--text-lo); margin-top:6px; }
+  .watch-fallback{ font-size:11px; color:var(--accent); margin-top:4px; display:inline-block; }
+
+  /* ---------- DESKTOP BACKGROUNDS ---------- */
+  .bg-layer.bg-court{ background-image: repeating-linear-gradient(90deg, #14161f 0px, #14161f 3px, #101219 3px, #101219 42px); background-color: var(--bg-deep); }
+  .bg-layer.bg-plain{ background: var(--bg-deep); }
+  .bg-layer.bg-nebula{ background: radial-gradient(circle at 20% 20%, rgba(255,122,41,0.18), transparent 45%), radial-gradient(circle at 80% 75%, rgba(45,212,191,0.14), transparent 45%), var(--bg-deep); }
+  .bg-layer.bg-grid{ background: linear-gradient(var(--court-line) 1px, transparent 1px) 0 0/32px 32px, linear-gradient(90deg, var(--court-line) 1px, transparent 1px) 0 0/32px 32px, var(--bg-deep); }
+  .bg-layer.bg-dots{ background: radial-gradient(var(--court-line) 1.5px, transparent 1.5px) 0 0/22px 22px, var(--bg-deep); }
+  .bg-layer.bg-leather{ background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.35) 41%, transparent 43%) 0 0/54px 54px, radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px) 0 0/6px 6px, var(--bg-deep); }
+  .bg-layer.bg-arena{ background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.10), transparent 60%), radial-gradient(ellipse 30% 50% at 15% 100%, rgba(255,122,41,0.12), transparent 70%), radial-gradient(ellipse 30% 50% at 85% 100%, rgba(45,212,191,0.10), transparent 70%), var(--bg-deep); }
+  .bg-layer.bg-net{ background-image: repeating-linear-gradient(45deg, var(--court-line) 0px, var(--court-line) 1px, transparent 1px, transparent 18px), repeating-linear-gradient(-45deg, var(--court-line) 0px, var(--court-line) 1px, transparent 1px, transparent 18px); background-color: var(--bg-deep); }
+  .bg-layer.bg-sunset{ background: linear-gradient(180deg, #17263d 0%, #3d3352 30%, #b8703f 65%, #f2c14e 100%); }
+  .bg-layer.bg-midnight{ background: radial-gradient(ellipse at 50% 130%, #2a1d45, #0c0e14 70%); }
+  .bg-layer.bg-mono{ background: linear-gradient(#2a2a2a, #0c0e14 80%); }
+  .bg-layer.bg-photo{ background: #0c0e14 url('bg-photo.jpg') center/cover no-repeat; }
+  .bg-layer.bg-photo::before{ content:''; position:absolute; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; }
+  .bg-layer.bg-unsplash-hoop{ background:#0c0e14 url("https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat; }
+  .bg-layer.bg-unsplash-hoop::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.32); pointer-events:none; }
+  .bg-layer.bg-unsplash-court{ background:#0c0e14 url("https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat; }
+  .bg-layer.bg-unsplash-court::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.32); pointer-events:none; }
+  .bg-layer.bg-unsplash-blue{ background:#0c0e14 url("https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat; }
+  .bg-layer.bg-unsplash-blue::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.32); pointer-events:none; }
+  .bg-layer.bg-unsplash-aerial{ background:#0c0e14 url("https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat; }
+  .bg-layer.bg-unsplash-aerial::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.32); pointer-events:none; }
+  .bg-layer.bg-unsplash-ball-ring{ background:#0c0e14 url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat; }
+  .bg-layer.bg-unsplash-ball-ring::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.32); pointer-events:none; }
+  .bg-layer.bg-unsplash-silhouette{ background:#0c0e14 url('https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat; }
+  .bg-layer.bg-unsplash-silhouette::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.28); pointer-events:none; }
+  .bg-layer.bg-unsplash-grayscale{ background:#0c0e14 url('https://unsplash.com/photos/UFIZodJgScQ/download?force=true') center/cover no-repeat; }
+  .bg-layer.bg-unsplash-grayscale::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.30); pointer-events:none; }
+  .bg-layer.bg-unsplash-illustration{ background:#0c0e14 url('https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat; }
+  .bg-layer.bg-unsplash-illustration::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,0.24); pointer-events:none; }
+  .bg-swatch{ width:44px; height:32px; border-radius:6px; cursor:pointer; border:2px solid var(--border); background-size:cover; }
+  .bg-swatch.active{ border-color:var(--accent); }
+  .bg-swatches{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* Mascot settings */
+  .mascot-icon-options{ display:flex; gap:8px; }
+  .mascot-icon-opt{ width:32px; height:32px; border-radius:8px; background:var(--bg-panel-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; }
+  .mascot-icon-opt.active{ border-color:var(--accent); }
+  .speed-options{ display:flex; gap:6px; }
+  .speed-opt{ background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi); border-radius:6px; padding:5px 10px; font-size:11px; cursor:pointer; }
+  .speed-opt.active{ border-color:var(--accent); background:rgba(255,122,41,0.12); }
+
+  /* ---------- CONTEXT MENU ---------- */
+  #context-menu{
+    position:fixed; z-index:9200; min-width:190px; background:var(--bg-panel); border:1px solid var(--border);
+    border-radius:10px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:none;
+  }
+  #context-menu.open{ display:block; }
+  .ctx-item{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; font-size:12.5px; cursor:pointer; color:var(--text-hi); position:relative; }
+  .ctx-item:hover{ background:rgba(255,255,255,0.07); }
+  .ctx-item .ctx-icon{ width:16px; text-align:center; }
+  .ctx-item .ctx-arrow{ margin-left:auto; color:var(--text-lo); font-size:10px; }
+  .ctx-divider{ height:1px; background:var(--border); margin:6px 4px; }
+  .ctx-submenu{ display:none; position:absolute; left:100%; top:-6px; min-width:170px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+  .ctx-item.has-submenu:hover .ctx-submenu{ display:block; }
+
+  /* Terminal */
+  .term-body{ background:#0a0c10; height:100%; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:#9fd6ff; overflow:auto; display:flex; flex-direction:column; }
+  .term-output{ flex:1; white-space:pre-wrap; word-break:break-word; }
+  .term-line-cmd{ color:var(--accent); }
+  .term-line-ok{ color:#6ee7b7; }
+  .term-line-err{ color:var(--accent-red); }
+  .term-input-row{ display:flex; align-items:center; gap:6px; margin-top:4px; }
+  .term-input-row .prompt{ color:var(--accent); flex-shrink:0; }
+  .term-input-row input{
+    flex:1; background:transparent; border:none; outline:none; color:#9fd6ff;
+    font-family:'IBM Plex Mono',monospace; font-size:12px;
+  }
+
+  /* Consistent toolbar buttons (Paint, Browser, etc.) */
+  .toolbar-btn{
+    background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text-hi);
+    border-radius:8px; padding:7px 13px; cursor:pointer; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    height:32px; box-sizing:border-box; transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .toolbar-btn:hover{ background:#262c4d; }
+  .toolbar-btn.active{ background:rgba(255,122,41,0.16); border-color:var(--accent); color:var(--accent); }
+  .toolbar-btn.primary{ background:var(--accent); border-color:var(--accent); color:#0c0e14; font-weight:700; }
+  .toolbar-btn.primary:hover{ filter:brightness(1.08); }
+  .toolbar-row{ display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-panel-2); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .toolbar-color{ width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:none; cursor:pointer; padding:2px; }
+  .toolbar-range{ width:80px; height:32px; }
+  .browser-toolbar{ display:flex; align-items:center; gap:6px; padding:8px; background:var(--bg-panel-2); border-bottom:1px solid var(--border); }
+  .browser-address{ flex:1; height:32px; background:#0e1017; border:1px solid var(--border); color:var(--text-hi); border-radius:8px; padding:0 10px; font-family:'IBM Plex Mono',monospace; font-size:11px; box-sizing:border-box; }
+  .browser-fallback-row{ font-size:10px; color:var(--text-lo); padding:6px 10px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+  .browser-fallback-row a{ color:var(--accent); margin-left:4px; }
+  .browser-status-close{ margin-left:auto; background:none; border:none; color:var(--text-lo); font-size:14px; cursor:pointer; line-height:1; padding:2px 4px; }
+  .browser-status-close:hover{ color:var(--text-hi); }
+  .browser-shell{ margin:-14px; height:calc(100% + 28px); display:flex; flex-direction:column; min-height:0; }
+  .browser-tabs{display:flex;align-items:flex-end;gap:2px;padding:4px 6px 0;background:#12151c;border-bottom:1px solid #303442;overflow-x:auto;min-height:39px;}
+  .browser-tab{display:flex;align-items:center;gap:6px;min-width:115px;max-width:180px;height:32px;padding:0 7px 0 10px;background:#1b1e27;border:1px solid #303442;border-bottom:0;border-radius:6px 6px 0 0;color:#9296a4;cursor:pointer;font-size:10px;flex-shrink:0;}
+  .browser-tab.active{background:#0e1017;color:#f3f0e8;border-color:#454a59;}
+  .browser-tab-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+  .browser-tab-close{width:20px;height:20px;border:0;background:transparent;color:#777b88;cursor:pointer;border-radius:3px;font-size:13px;line-height:20px;}
+  .browser-tab-close:hover{background:#292d38;color:#f3f0e8;}
+  .browser-new-tab{height:27px;min-width:28px;margin:0 0 3px 3px;border:0;border-radius:5px;background:transparent;color:#aeb2bd;cursor:pointer;font-size:17px;}
+  .browser-new-tab:hover{background:#252934;color:#fff;}
+  .browser-tabs::-webkit-scrollbar{height:3px}.browser-tabs::-webkit-scrollbar-thumb{background:#353947;border-radius:3px}
+  .browser-toolbar{box-shadow:none}
+  .browser-address{transition:border-color .12s;background:#0b0d12;border-radius:6px}
+  .browser-address:focus{outline:none;border-color:#555b6c;box-shadow:none}
+  .browser-page-wrap{border-top:0}
+  .browser-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#f7f7f7;color:#555;backdrop-filter:none}
+  .browser-loading.hidden{display:none}.browser-loader-ring{width:24px;height:24px;border-radius:50%;border:2px solid #ddd;border-top-color:#777;animation:spin .7s linear infinite}.browser-loading-title{font-size:12px;color:#444;font-weight:500}.browser-loading-sub{font-size:9px;color:#888}
+
+  .browser-page-wrap{ position:relative; flex:1; min-height:0; overflow:hidden; background:#fff; }
+  .browser-empty{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:var(--bg-panel); color:var(--text-hi); text-align:center; }
+  .browser-empty.hidden{ display:none; }
+  .browser-empty-icon{ font-size:42px; }
+  .browser-empty-title{ font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; }
+  .browser-empty-sub{ font-size:11px; color:var(--text-lo); }
+  .browser-quick-links{ display:flex; gap:7px; margin-top:6px; flex-wrap:wrap; justify-content:center; }
+  .browser-quick-links button{ background:var(--bg-panel-2); color:var(--text-hi); border:1px solid var(--border); border-radius:7px; padding:6px 10px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10px; }
+  .browser-quick-links button:hover{ border-color:var(--accent); color:var(--accent); }
+  .browser-status{ color:var(--text-lo); }
+
+  /* ---------- SETTINGS APP ---------- */
+  .settings-layout{ display:flex; height:100%; margin:-14px; }
+  .settings-nav{ width:130px; background:var(--bg-panel-2); border-right:1px solid var(--border); padding:10px 0; flex-shrink:0; }
+  .settings-nav-item{ padding:10px 14px; font-size:12px; cursor:pointer; color:var(--text-lo); border-left:2px solid transparent; }
+  .settings-nav-item:hover{ color:var(--text-hi); }
+  .settings-nav-item.active{ color:var(--text-hi); border-left-color:var(--accent); background:rgba(255,255,255,0.04); }
+  .settings-content{ flex:1; padding:16px; overflow:auto; }
+  .settings-section-title{ font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; margin:0 0 12px; }
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-row .label{ font-size:12px; }
+  .settings-row .sub{ font-size:10px; color:var(--text-lo); margin-top:2px; }
+  .toggle{ width:38px; height:20px; border-radius:20px; background:var(--bg-panel-2); border:1px solid var(--border); position:relative; cursor:pointer; flex-shrink:0; }
+  .toggle .knob{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--text-lo); transition:all 0.15s ease; }
+  .toggle.on{ background:var(--accent); border-color:var(--accent); }
+  .toggle.on .knob{ left:20px; background:#0c0e14; }
+  .swatches{ display:flex; gap:8px; }
+  .swatch{ width:22px; height:22px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
+  .swatch.active{ border-color:var(--text-hi); }
+
+  /* ---------- DOCK ---------- */
+  #dock-wrap{ position:fixed; left:0; right:0; bottom:10px; bottom:calc(10px + env(safe-area-inset-bottom)); display:flex; justify-content:center; z-index:500; }
+  #dock{
+    display:flex; align-items:flex-end; gap:10px;
+    background:rgba(20,23,35,0.55); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+    border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:9px 14px;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .dock-icon{
+    position:relative; width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center;
+    font-size:19px; cursor:pointer; transition:transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -6px 10px rgba(0,0,0,0.15);
+  }
+  .dock-icon::after{ content:''; position:absolute; inset:0; border-radius:13px; background:linear-gradient(160deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 55%); pointer-events:none; }
+  .dock-icon:hover{ transform:translateY(-9px) scale(1.14); }
+  .dock-icon.bounce{ animation: dockBounce 0.4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes dockBounce{ 0%{ transform:translateY(0) scale(1); } 40%{ transform:translateY(-14px) scale(1.1); } 100%{ transform:translateY(0) scale(1); } }
+  .dock-icon .run-dot{ position:absolute; bottom:-8px; width:4px; height:4px; border-radius:50%; background:var(--accent); display:none; box-shadow:0 0 6px var(--accent); }
+  .dock-icon.running .run-dot{ display:block; }
+
+  /* ---------- TOASTS ---------- */
+  #toasts{ position:fixed; top:44px; right:14px; z-index:9000; display:flex; flex-direction:column; gap:8px; }
+  .toast{ background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:12px; display:flex; align-items:center; gap:8px; box-shadow:0 10px 30px rgba(0,0,0,0.4); animation: toastIn 0.25s ease, toastOut 0.3s ease 2.6s forwards; }
+  @keyframes toastIn{ from{ opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes toastOut{ to{ opacity:0; transform:translateY(-8px); } }
+</style>
+</head>
+<body>
+
+<div id="boot" aria-label="HoopsOS loading">
+  <div class="boot-panel">
+    <div class="boot-brand"><div class="boot-ball">🏀</div><div><h1>HOOPS<span style="color:var(--accent);">OS</span></h1><p>BASKETBALL DESKTOP ENVIRONMENT</p></div></div>
+    <div class="boot-titlebar"><span style="background:var(--accent-red);"></span><span style="background:var(--accent-cream);"></span><span style="background:#6ee7b7;"></span><div class="label">SYSTEM STARTUP</div></div>
+    <div id="boot-log"></div><div class="boot-progress"><div class="boot-progress-bar"></div></div>
+    <div class="boot-footer"><div class="boot-ring"></div><div class="msg" id="boot-msg">Warming up the court...</div><div class="boot-percent" id="boot-percent">0%</div></div>
+  </div>
+</div>
+
+<div id="lockscreen" onclick="enterDesktop()">
+  <div class="lock-brand">🏀 HOOPSOS</div>
+  <div class="lock-time" id="lock-time">--:--</div>
+  <div class="lock-date" id="lock-date">-</div>
+  <div class="lock-hint">Click anywhere to start</div>
+</div>
+
+<div id="topbar">
+  <div class="left">
+    <div class="brand">HoopsOS</div>
+    <div class="menu-item" onclick="toggleMenu(event, 'file')">File
+      <div class="menu-dropdown" id="menu-file">
+        <div class="ctx-item" onclick="closeMenus(); openWindow('playbook')"><span class="ctx-icon">📋</span> New Note</div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('schedule'); addScheduleGame()"><span class="ctx-icon">🗓️</span> New Game</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('settings')"><span class="ctx-icon">⚙️</span> Settings</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="toggleMenu(event, 'roster')">Roster
+      <div class="menu-dropdown" id="menu-roster">
+        <div class="ctx-item" onclick="closeMenus(); openWindow('scoreboard')"><span class="ctx-icon">🏀</span> Scoreboard</div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('stats')"><span class="ctx-icon">📊</span> Stat Tracker</div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('schedule')"><span class="ctx-icon">🗓️</span> Schedule</div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('gallery')"><span class="ctx-icon">🏆</span> Hall of Fame</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="toggleMenu(event, 'help')">Help
+      <div class="menu-dropdown" id="menu-help">
+        <div class="ctx-item" onclick="closeMenus(); openWindow('locker')"><span class="ctx-icon">🧢</span> Locker Room</div>
+        <div class="ctx-item" onclick="closeMenus(); openWindow('settings'); setTimeout(() => showSettingsPane('about'), 0)"><span class="ctx-icon">ℹ️</span> About HoopsOS</div>
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="notif-bell" id="notif-bell" onclick="toggleNotifPanel(event)">🔔<span class="notif-badge" id="notif-badge" style="display:none;">0</span></span>
+    <span id="battery-display">🔋</span>
+    <span>📶</span>
+    <span id="topbar-clock">--:--</span>
+  </div>
+</div>
+
+<canvas id="confetti-canvas" style="position:fixed; inset:0; z-index:9400; pointer-events:none;"></canvas>
+
+<div id="notif-panel">
+  <div class="notif-header">Notifications</div>
+  <div id="notif-list"></div>
+</div>
+
+<div id="toasts"></div>
+
+<div id="context-menu"></div>
+
+<div id="desktop" class="icons-medium">
+  <div class="bg-layer bg-court active" id="bg-layer-a"></div>
+  <div class="bg-layer" id="bg-layer-b"></div>
+  <div id="rainmeter-clock">
+    <div class="rm-time" id="rm-time">--:--</div>
+    <div class="rm-date" id="rm-date">-</div>
+  </div>
+  <div id="spotlight-wrap">
+    <input id="spotlight" placeholder="Search apps... (Enter to launch)" autocomplete="off">
+    <div id="spotlight-results"></div>
+  </div>
+  <div id="widgets">
+    <div class="widget" id="widget-clock">
+      <div class="w-title">GAME CLOCK</div>
+      <div class="time" id="widget-time">12:00</div>
+      <div class="widget-clock-period" id="widget-period">Quarter 1</div>
+      <div class="widget-clock-controls">
+        <button class="primary" id="gameclock-toggle" onclick="toggleGameClock()">Start</button>
+        <button onclick="resetGameClock()">Reset</button>
+        <button onclick="nextPeriod()">Next Qtr</button>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="w-title">LIVE SCORE</div>
+      <div class="widget-score-row">
+        <span id="widget-score-a">0</span>
+        <span class="vs">HOME – AWAY</span>
+        <span id="widget-score-b">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="icons"></div>
+  <div id="mascot">🏀</div>
+</div>
+
+<div id="dock-wrap">
+  <div id="dock"></div>
+</div>
+
+<script>
+/* ================= BOOT SEQUENCE ================= */
+const bootLines = [
+  ["[ 0.0012 ]", "Inflating basketball to regulation PSI..."],
+  ["[ 0.0480 ]", "Loading roster.json..."],
+  ["[ 0.0910 ]", "Starting hoop-scoreboard.service"],
+  ["[ 0.1320 ]", "Starting hoop-shotclock.service"],
+  ["[ 0.1780 ]", "Starting hoop-settings.service"],
+  ["[ 0.2210 ]", "Warming up PA announcer..."],
+  ["[ 0.2600 ]", "Buffing hardwood floor..."],
+  ["[ 0.3050 ]", "All services started successfully", true],
+];
+const bootLogEl = document.getElementById('boot-log');
+const bootMsgEl = document.getElementById('boot-msg');
+let bi = 0;
+function typeBootLine(){
+  if(bi >= bootLines.length){ bootMsgEl.textContent = 'Tip-off! HoopsOS is ready.'; document.getElementById('boot-percent').textContent='100%'; return; }
+  const [tag, text, ok] = bootLines[bi];
+  const row = document.createElement('div');
+  row.innerHTML = `<span class="tag">${tag}</span> <span class="${ok ? 'ok' : ''}">${text}</span>`;
+  bootLogEl.appendChild(row); bootLogEl.scrollTop = bootLogEl.scrollHeight; bi++;
+  document.getElementById('boot-percent').textContent=Math.min(100,Math.round((bi/bootLines.length)*100))+'%';
+  bootMsgEl.textContent=bi<bootLines.length?'Loading HoopsOS services...':'Tip-off! HoopsOS is ready.';
+  setTimeout(typeBootLine,320);
+}
+typeBootLine();
+function enterDesktop(){
+  document.getElementById('lockscreen').classList.add('hide');
+  fireConfetti(window.innerWidth / 2, 120);
+  playSound('open');
+  // Starter app: open Settings on the About page when HoopsOS starts.
+  setTimeout(() => {
+    openWindow('settings');
+    setTimeout(() => showSettingsPane('about'), 0);
+  }, 450);
+}
+
+/* ================= SETTINGS STATE ================= */
+const settings = {
+  accent: '#ff7a29',
+  sound: true,
+  mascot: false,
+  background: 'court',
+  mascotIcon: '🏀',
+  mascotSpeed: 'normal',
+  mascotFollow: false,
+  iconSize: 'medium',
+  autoArrange: false,
+  showIcons: true,
+  rainmeterClock: true
+};
+const accentOptions = [
+  { name:'Sunset Orange', value:'#ff7a29' },
+  { name:'Bucket Red', value:'#e6484f' },
+  { name:'Court Teal', value:'#2dd4bf' },
+  { name:'Championship Purple', value:'#a78bfa' },
+  { name:'Away Blue', value:'#3b82f6' },
+  { name:'Home Gold', value:'#fbbf24' },
+];
+const backgroundOptions = [
+  { name:'Hardwood Court', value:'court', preview:'repeating-linear-gradient(90deg, #14161f 0 3px, #2a2e3d 3px 8px)' },
+  { name:'Plain', value:'plain', preview:'#0c0e14' },
+  { name:'Nebula', value:'nebula', preview:'radial-gradient(circle at 30% 30%, #ff7a29, #0c0e14 60%)' },
+  { name:'Grid', value:'grid', preview:'linear-gradient(#2a2e3d 1px, transparent 1px) 0 0/8px 8px, linear-gradient(90deg, #2a2e3d 1px, transparent 1px) 0 0/8px 8px, #0c0e14' },
+  { name:'Dots', value:'dots', preview:'radial-gradient(#2a2e3d 1.5px, transparent 1.5px) 0 0/8px 8px, #0c0e14' },
+  { name:'Leather', value:'leather', preview:'radial-gradient(circle at 50% 50%, transparent 30%, #2a2e3d 32%, transparent 36%) 0 0/16px 16px, #0c0e14' },
+  { name:'Arena Lights', value:'arena', preview:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.25), transparent 60%), #0c0e14' },
+  { name:'Net Weave', value:'net', preview:'repeating-linear-gradient(45deg, #2a2e3d 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, #2a2e3d 0 1px, transparent 1px 6px), #0c0e14' },
+  { name:'Sunset Palms', value:'sunset', preview:'linear-gradient(180deg, #1a2a3d 0%, #d98a3d 60%, #f2c14e 100%)' },
+  { name:'Midnight Fade', value:'midnight', preview:'radial-gradient(ellipse at 50% 120%, #2a1d45, #0c0e14 70%)' },
+  { name:'Mono Court', value:'mono', preview:'linear-gradient(#3a3a3a, #0c0e14)' },
+  { name:'My Photo', value:'photo', preview:'#0c0e14 url(bg-photo.jpg) center/cover no-repeat' },
+  { name:'Basketball — Outdoor Court', value:'unsplash-hoop', preview:'url(https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — City Court', value:'unsplash-court', preview:'url(https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — Indoor Hoop', value:'unsplash-blue', preview:'url(https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — Ocean Court', value:'unsplash-aerial', preview:'url(https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — Ball Under Ring', value:'unsplash-ball-ring', preview:'url(https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — Venice Silhouette', value:'unsplash-silhouette', preview:'url(https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=1000&q=80)' },
+  { name:'Basketball — Grayscale Players', value:'unsplash-grayscale', preview:'url(https://unsplash.com/photos/UFIZodJgScQ/download?force=true)' },
+  { name:'Basketball — Court Illustration', value:'unsplash-illustration', preview:'url(https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=1000&q=80)' },
+];
+const mascotIconOptions = ['🏀','🔥','⭐','🎯','👟'];
+const speedOptions = [
+  { label:'Slow', value:'slow', interval:9000, transition:6 },
+  { label:'Normal', value:'normal', interval:6000, transition:4 },
+  { label:'Fast', value:'fast', interval:2500, transition:1.2 },
+];
+let activeBgLayer = 'a';
+// Preload every photo-based background so switching to it later is instant, no flash of loading
+const bgPhotoUrls = [
+  'bg-photo.jpg',
+  'https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=2400&q=85',
+  'https://unsplash.com/photos/UFIZodJgScQ/download?force=true',
+  'https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=2400&q=85',
+];
+bgPhotoUrls.forEach(url => { const img = new Image(); img.src = url; });
+
+function applyBackground(name){
+  settings.background = name;
+  const currentEl = document.getElementById('bg-layer-' + activeBgLayer);
+  const nextLayerKey = activeBgLayer === 'a' ? 'b' : 'a';
+  const nextEl = document.getElementById('bg-layer-' + nextLayerKey);
+  nextEl.className = 'bg-layer bg-' + name;
+  void nextEl.offsetWidth; // force reflow so the transition actually runs
+  nextEl.classList.add('active');
+  currentEl.classList.remove('active');
+  activeBgLayer = nextLayerKey;
+}
+function applyAccent(hex){
+  settings.accent = hex;
+  document.documentElement.style.setProperty('--accent', hex);
+}
+
+/* ================= TOP BAR MENUS ================= */
+function toggleMenu(e, name){
+  e.stopPropagation();
+  const el = document.getElementById('menu-' + name);
+  const wasOpen = el.classList.contains('open');
+  closeMenus();
+  if(!wasOpen) el.classList.add('open');
+}
+function closeMenus(){
+  document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.remove('open'));
+}
+document.addEventListener('click', closeMenus);
+
+/* ================= CONTEXT MENU ================= */
+const contextMenu = document.getElementById('context-menu');
+function desktopMenuHTML(){
+  return `
+    <div class="ctx-item has-submenu">
+      <span class="ctx-icon">🔳</span> View <span class="ctx-arrow">▸</span>
+      <div class="ctx-submenu">
+        <div class="ctx-item" onclick="setIconSize('large')"><span class="ctx-icon">${settings.iconSize==='large'?'●':'○'}</span> Large icons</div>
+        <div class="ctx-item" onclick="setIconSize('medium')"><span class="ctx-icon">${settings.iconSize==='medium'?'●':'○'}</span> Medium icons</div>
+        <div class="ctx-item" onclick="setIconSize('small')"><span class="ctx-icon">${settings.iconSize==='small'?'●':'○'}</span> Small icons</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="toggleAutoArrange()"><span class="ctx-icon">${settings.autoArrange?'✓':''}</span> Auto arrange icons</div>
+        <div class="ctx-item" onclick="ctxAlignToGrid()"><span class="ctx-icon">▦</span> Align icons to grid</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="toggleShowIcons()"><span class="ctx-icon">${settings.showIcons?'✓':''}</span> Show desktop icons</div>
+      </div>
+    </div>
+    <div class="ctx-item" onclick="ctxRefresh()"><span class="ctx-icon">🔄</span> Refresh</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item has-submenu">
+      <span class="ctx-icon">➕</span> New <span class="ctx-arrow">▸</span>
+      <div class="ctx-submenu">
+        <div class="ctx-item" onclick="ctxNewFolder()"><span class="ctx-icon">📁</span> Folder</div>
+        <div class="ctx-item" onclick="ctxNewNote()"><span class="ctx-icon">📋</span> Note in Playbook</div>
+        <div class="ctx-item" onclick="ctxNewGame()"><span class="ctx-icon">🗓️</span> Game in Schedule</div>
+      </div>
+    </div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="closeCtx(); openWindow('terminal')"><span class="ctx-icon">🖥️</span> Open Terminal</div>
+    <div class="ctx-item" onclick="ctxOpenSettings('appearance')"><span class="ctx-icon">🖥️</span> Display settings</div>
+    <div class="ctx-item" onclick="ctxOpenSettings('appearance')"><span class="ctx-icon">🎨</span> Personalize</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="ctxOpenSettings('about')"><span class="ctx-icon">⚙️</span> Settings</div>
+  `;
+}
+function iconMenuHTML(id){
+  const def = appDefs[id];
+  const pinned = dockPinned.has(id);
+  return `
+    <div class="ctx-item" onclick="closeCtx(); openWindow('${id}')"><span class="ctx-icon">${def.icon}</span> Open</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="toggleDockPin('${id}')"><span class="ctx-icon">${pinned ? '✓' : '➕'}</span> ${pinned ? 'Remove from taskbar' : 'Show in taskbar'}</div>
+  `;
+}
+function openContextMenuAt(x, y, html){
+  contextMenu.innerHTML = html;
+  const menuW = 210, menuH = 260;
+  contextMenu.style.left = Math.min(x, window.innerWidth - menuW) + 'px';
+  contextMenu.style.top = Math.min(y, window.innerHeight - menuH) + 'px';
+  contextMenu.classList.add('open');
+}
+document.getElementById('desktop').addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const iconEl = e.target.closest('.icon');
+  if(iconEl){
+    openContextMenuAt(e.clientX, e.clientY, iconMenuHTML(iconEl.dataset.appId));
+  } else {
+    openContextMenuAt(e.clientX, e.clientY, desktopMenuHTML());
+  }
+});
+document.addEventListener('click', (e) => {
+  if(!contextMenu.contains(e.target)){ contextMenu.classList.remove('open'); }
+});
+
+// Long-press support for touch devices, since there's no native right-click on mobile
+let longPressTimer = null;
+let longPressFired = false;
+document.getElementById('desktop').addEventListener('touchstart', (e) => {
+  if(e.target.closest('.window')) return;
+  longPressFired = false;
+  const touch = e.touches[0];
+  const iconEl = e.target.closest('.icon');
+  longPressTimer = setTimeout(() => {
+    longPressFired = true;
+    if(navigator.vibrate) navigator.vibrate(15);
+    if(iconEl){
+      openContextMenuAt(touch.clientX, touch.clientY, iconMenuHTML(iconEl.dataset.appId));
+    } else {
+      openContextMenuAt(touch.clientX, touch.clientY, desktopMenuHTML());
+    }
+  }, 500);
+}, { passive:true });
+document.getElementById('desktop').addEventListener('touchmove', () => {
+  clearTimeout(longPressTimer);
+}, { passive:true });
+document.getElementById('desktop').addEventListener('touchend', () => {
+  clearTimeout(longPressTimer);
+}, { passive:true });
+function closeCtx(){ contextMenu.classList.remove('open'); }
+function setIconSize(size){
+  settings.iconSize = size;
+  document.getElementById('desktop').classList.remove('icons-small','icons-medium','icons-large');
+  document.getElementById('desktop').classList.add('icons-' + size);
+  closeCtx();
+}
+function toggleAutoArrange(){
+  settings.autoArrange = !settings.autoArrange;
+  if(settings.autoArrange) ctxArrangeIcons(false);
+  closeCtx();
+  showToast(settings.autoArrange ? '▦ Auto arrange on' : 'Auto arrange off');
+}
+function ctxAlignToGrid(){
+  const gridSize = settings.iconSize === 'large' ? 118 : settings.iconSize === 'small' ? 74 : 96;
+  Object.keys(iconPositions).forEach(id => {
+    const pos = iconPositions[id];
+    pos.left = Math.round(pos.left / gridSize) * gridSize;
+    pos.top = Math.round(pos.top / (gridSize + 10)) * (gridSize + 10);
+    const iconEl = document.querySelector(`.icon[data-app-id="${id}"]`);
+    if(iconEl){ iconEl.style.left = pos.left + 'px'; iconEl.style.top = pos.top + 'px'; }
+  });
+  closeCtx();
+  showToast('▦ Icons aligned to grid');
+}
+function toggleRainmeterClock(){
+  settings.rainmeterClock = !settings.rainmeterClock;
+  document.getElementById('desktop').classList.toggle('rainmeter-hidden', !settings.rainmeterClock);
+}
+function toggleShowIcons(){
+  settings.showIcons = !settings.showIcons;
+  document.getElementById('desktop').classList.toggle('icons-hidden', !settings.showIcons);
+  closeCtx();
+}
+let folderCounter = 0;
+const folders = {};
+function ctxNewFolder(){
+  folderCounter++;
+  const id = 'folder-' + folderCounter;
+  folders[id] = { name: 'New Folder', appIds: [] };
+  const desktop = document.getElementById('desktop');
+  const pos = { left: 100 + (folderCounter % 4) * 96, top: 100 + Math.floor(folderCounter / 4) * 106 };
+  iconPositions[id] = pos;
+  const icon = document.createElement('div');
+  icon.className = 'icon';
+  icon.dataset.appId = id;
+  icon.dataset.folder = 'true';
+  icon.style.left = pos.left + 'px';
+  icon.style.top = pos.top + 'px';
+  icon.ondblclick = () => openFolder(id);
+  icon.innerHTML = `<div class="glyph" style="background:#5a6178;">📁</div><div class="label">${folders[id].name}</div>`;
+  iconsEl.appendChild(icon);
+  makeIconDraggable(icon, id);
+  closeCtx();
+  showToast('📁 Folder created — drag apps onto it');
+}
+function openFolder(id){
+  const folder = folders[id];
+  if(!folder) return;
+  if(folder.appIds.length === 0){ showToast('📁 Folder is empty — drag app icons onto it'); return; }
+  const html = folder.appIds.map(appId => {
+    const def = appDefs[appId];
+    return `<div class="ctx-item" onclick="closeCtx(); openWindow('${appId}')"><span class="ctx-icon">${def.icon}</span> ${def.title}</div>
+            <div class="ctx-item" onclick="removeFromFolder('${id}','${appId}')" style="font-size:10px; color:var(--text-lo); padding-left:26px;">Remove from folder</div>`;
+  }).join('<div class="ctx-divider"></div>');
+  const iconEl = document.querySelector(`.icon[data-app-id="${id}"]`);
+  const rect = iconEl.getBoundingClientRect();
+  openContextMenuAt(rect.right + 6, rect.top, html);
+}
+function removeFromFolder(folderId, appId){
+  const folder = folders[folderId];
+  folder.appIds = folder.appIds.filter(a => a !== appId);
+  const appIcon = document.querySelector(`.icon[data-app-id="${appId}"]`);
+  if(appIcon) appIcon.style.display = '';
+  closeCtx();
+  showToast(`Removed ${appDefs[appId].title} from folder`);
+}
+function addAppToFolder(folderId, appId){
+  const folder = folders[folderId];
+  if(!folder || folder.appIds.includes(appId)) return;
+  folder.appIds.push(appId);
+  const appIcon = document.querySelector(`.icon[data-app-id="${appId}"]`);
+  if(appIcon) appIcon.style.display = 'none';
+  showToast(`📁 Added ${appDefs[appId].title} to ${folder.name}`);
+}
+function ctxArrangeIcons(showMsg){
+  dockAppOrder.forEach((id, i) => {
+    const col = Math.floor(i / 5);
+    const row = i % 5;
+    const pos = { left: 10 + col * 96, top: 10 + row * 106 };
+    iconPositions[id] = pos;
+    const iconEl = iconsEl.children[i];
+    if(iconEl){ iconEl.style.left = pos.left + 'px'; iconEl.style.top = pos.top + 'px'; }
+  });
+  closeCtx();
+  if(showMsg !== false) showToast('▦ Icons arranged');
+}
+function ctxRefresh(){
+  closeCtx();
+  showToast('🔄 Desktop refreshed');
+}
+function ctxNewNote(){
+  openWindow('playbook');
+  closeCtx();
+}
+function ctxNewGame(){
+  openWindow('schedule');
+  addScheduleGame();
+  closeCtx();
+}
+function ctxOpenSettings(pane){
+  openWindow('settings');
+  setTimeout(() => showSettingsPane(pane), 0);
+  closeCtx();
+}
+
+/* ================= WINDOW MANAGER ================= */
+// Keep app windows above the desktop Spotlight search bar.
+let zTop = 1000;
+const openWindows = {};
+
+const appDefs = {
+  playbook: { title:"Playbook", dot:"var(--accent-cream)", icon:"📋", width:360, height:260,
+    render: () => `<textarea id="notes-textarea" placeholder="Draw up a play in words..." oninput="savePlaybookNotes(this.value)"></textarea>` },
+
+  scoreboard: { title:"Scoreboard", dot:"var(--accent)", icon:"🏀", width:380, height:300,
+    render: () => `
+      <div class="score-wrap">
+        <div class="score-team">
+          <input value="HOME" maxlength="8">
+          <div class="score-num" id="score-a">0</div>
+          <div class="score-btns"><button onclick="bumpScore('a',-1)">-1</button><button onclick="bumpScore('a',1)">+1</button><button onclick="bumpScore('a',2)">+2</button><button onclick="bumpScore('a',3)">+3</button></div>
+        </div>
+        <div class="score-divider">–</div>
+        <div class="score-team">
+          <input value="AWAY" maxlength="8">
+          <div class="score-num" id="score-b">0</div>
+          <div class="score-btns"><button onclick="bumpScore('b',-1)">-1</button><button onclick="bumpScore('b',1)">+1</button><button onclick="bumpScore('b',2)">+2</button><button onclick="bumpScore('b',3)">+3</button></div>
+        </div>
+      </div>
+      <button class="score-reset" onclick="resetScore()">Reset</button>
+    ` },
+
+  shotclock: { title:"Clock", dot:"var(--accent-red)", icon:"⏱", width:340, height:320,
+    render: () => `
+      <div class="clock-tabs" id="clock-tabs">
+        <div class="clock-tab active" data-mode="shot" onclick="switchClockMode('shot')">Shot Clock</div>
+        <div class="clock-tab" data-mode="timer" onclick="switchClockMode('timer')">Timer</div>
+        <div class="clock-tab" data-mode="stopwatch" onclick="switchClockMode('stopwatch')">Stopwatch</div>
+      </div>
+      <div id="clock-mode-body"></div>
+    ` },
+
+  locker: { title:"Locker Room", dot:"#4a4f63", icon:"🧢", width:340, height:320,
+    render: () => `
+      <div style="text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--accent); line-height:1;">44</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px;">MADHAV</div>
+        <div style="display:inline-block; margin-top:6px; padding:3px 10px; border-radius:20px; background:rgba(255,122,41,0.15); border:1px solid var(--accent); color:var(--accent); font-size:10px;">DEFENDER</div>
+      </div>
+      <p style="margin-top:12px;">Basketball, coding, and gaming — that's pretty much it. This whole OS is something I built myself.</p>
+    ` },
+
+  calculator: { title:"Calculator", dot:"#4a4f63", icon:"🧮", width:300, height:400,
+    render: () => `<div class="calc-screen" id="calc-screen">0</div><div class="calc-grid" id="calc-grid"></div>` },
+
+  stats: { title:"Stat Tracker", dot:"var(--accent-cream)", icon:"📊", width:340, height:320,
+    render: () => `
+      <div id="stat-rows"></div>
+      <button class="stat-reset" onclick="resetStats()">Reset stats</button>
+    ` },
+
+  schedule: { title:"Schedule", dot:"#2dd4bf", icon:"🗓️", width:360, height:320,
+    render: () => `
+      <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button class="calc-btn" id="sched-mode-btn" onclick="toggleScheduleEdit()">Edit</button>
+      </div>
+      <div id="sched-rows"></div>
+      <button class="sched-add" id="sched-add-btn" style="display:none;" onclick="addScheduleGame()">+ Add game</button>
+    ` },
+
+  hoopsgame: { title:"Hoops Shootout", dot:"var(--accent)", icon:"🎯", width:360, height:420,
+    render: () => `
+      <div style="margin:-14px; padding:10px; height:calc(100% + 28px); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; font-family:'Bebas Neue',sans-serif; font-size:16px; margin-bottom:6px;">
+          <span>Score: <span id="hoops-score" style="color:var(--accent);">0</span></span>
+          <span>Time: <span id="hoops-time" style="color:var(--accent-red);">20</span>s</span>
+        </div>
+        <canvas id="hoops-canvas" style="flex:1; width:100%; background:#0e1017; border:1px solid var(--border); border-radius:8px; cursor:crosshair;"></canvas>
+        <button class="score-reset" style="margin-top:8px;" onclick="startHoopsGame()">Start / Restart</button>
+      </div>
+    ` },
+
+  paint: { title:"Paint", dot:"#f472b6", icon:"🎨", width:420, height:440,
+    render: () => `
+      <div style="margin:-14px; height:calc(100% + 28px); display:flex; flex-direction:column;">
+        <div class="toolbar-row">
+          <input type="color" id="paint-color" value="#ff7a29" class="toolbar-color">
+          <input type="range" id="paint-size" min="1" max="30" value="4" class="toolbar-range">
+          <button class="toolbar-btn active" onclick="setPaintTool('pen')" id="paint-tool-pen">✏️ Pen</button>
+          <button class="toolbar-btn" onclick="setPaintTool('eraser')" id="paint-tool-eraser">🧹 Eraser</button>
+          <button class="toolbar-btn" onclick="paintClear()">🗑️ Clear</button>
+          <button class="toolbar-btn primary" onclick="paintSave()">💾 Save PNG</button>
+        </div>
+        <canvas id="paint-canvas" style="flex:1; width:100%; background:#0e1017; cursor:crosshair;"></canvas>
+      </div>
+    ` },
+
+  weather: { title:"Weather", dot:"#3b82f6", icon:"⛅", width:300, height:280,
+    render: () => `<div id="weather-body" style="text-align:center;">Loading weather…</div>` },
+
+  browser: { title:"Browser", dot:"#a78bfa", icon:"🌐", width:620, height:500,
+    render: () => `
+      <div class="browser-shell">
+        <div class="browser-tabs" id="browser-tabs"></div>
+        <div class="browser-toolbar">
+          <button class="toolbar-btn" onclick="browserNav(-1)" title="Back">←</button>
+          <button class="toolbar-btn" onclick="browserNav(1)" title="Forward">→</button>
+          <button class="toolbar-btn" onclick="browserReload()" title="Reload">⟳</button>
+          <input id="browser-address" value="https://www.google.com/webhp?igu=1" class="browser-address" placeholder="Search or enter website" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();browserGo()}">
+          <button class="toolbar-btn primary" onclick="browserGo()">Go</button>
+        </div>
+        <div class="browser-fallback-row" id="browser-fallback-row">
+          <span id="browser-status">Ready</span>
+          <a id="browser-fallback-link" href="https://www.google.com/webhp?igu=1" target="_blank" rel="noopener">Open in new tab ↗</a>
+          <button class="browser-status-close" onclick="document.getElementById('browser-fallback-row').style.display='none'" title="Dismiss">×</button>
+        </div>
+        <div class="browser-page-wrap">
+          <div id="browser-loading" class="browser-loading hidden"><div class="browser-loader-ring"></div><div class="browser-loading-title">Loading page…</div><div class="browser-loading-sub" id="browser-loading-sub">Connecting</div></div>
+          <iframe id="browser-frame" src="https://www.google.com/webhp?igu=1" title="HoopsOS Browser" style="width:100%;height:100%;border:none;background:#fff;"></iframe>
+          <div id="browser-empty" class="browser-empty">
+            <div class="browser-empty-icon">🌐</div>
+            <div class="browser-empty-title">HoopsOS Browser</div>
+            <div class="browser-empty-sub">Enter a website or search above</div>
+            <div class="browser-quick-links">
+              <button onclick="browserQuick('https://www.google.com/webhp?igu=1')">Google</button>
+              <button onclick="browserQuick('https://www.wikipedia.org')">Wikipedia</button>
+              <button onclick="browserQuick('https://www.nba.com')">NBA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    ` },
+
+  terminal: { title:"Terminal", dot:"#6ee7b7", icon:"🖥️", width:420, height:340,
+    render: () => `
+      <div class="term-body" style="margin:-14px; padding:14px;">
+        <div class="term-output" id="term-output">HoopsOS Terminal v1.0
+Type 'help' for a list of commands.
+</div>
+        <div class="term-input-row">
+          <span class="prompt">user@hoopsos:~$</span>
+          <input id="term-input" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    ` },
+
+  watch: { title:"Watch", dot:"#e6484f", icon:"📺", width:480, height:400,
+    render: () => `
+      <div class="watch-layout">
+        <div class="watch-list" id="watch-list"></div>
+        <div class="watch-player">
+          <iframe id="watch-frame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="origin"></iframe>
+          <div class="watch-title" id="watch-caption">Pick a highlight from the list</div>
+          <a class="watch-fallback" id="watch-link" href="#" target="_blank" rel="noopener">Watch on YouTube ↗</a>
+        </div>
+      </div>
+    ` },
+
+  gallery: { title:"Hall of Fame", dot:"#e6484f", icon:"🏆", width:380, height:400,
+    render: () => `<div class="gallery-grid" id="gallery-grid"></div><div class="gallery-detail" id="gallery-detail">Tap a legend for a quick fact</div>` },
+
+  settings: { title:"Settings", dot:"#8a8d9c", icon:"⚙️", width:540, height:440,
+    render: () => `
+      <div class="settings-layout">
+        <div class="settings-nav">
+          <div class="settings-nav-item active" data-pane="appearance" onclick="showSettingsPane('appearance')">Appearance</div>
+          <div class="settings-nav-item" data-pane="icons" onclick="showSettingsPane('icons')">Icons</div>
+          <div class="settings-nav-item" data-pane="mascot" onclick="showSettingsPane('mascot')">Mascot</div>
+          <div class="settings-nav-item" data-pane="sound" onclick="showSettingsPane('sound')">Sound</div>
+          <div class="settings-nav-item" data-pane="about" onclick="showSettingsPane('about')">About</div>
+        </div>
+        <div class="settings-content" id="settings-content"></div>
+      </div>
+    ` },
+};
+
+const settingsPanes = {
+  appearance: () => `
+    <div class="settings-section-title">Appearance</div>
+    <div class="settings-row">
+      <div><div class="label">Accent color</div><div class="sub">Changes the highlight color across HoopsOS</div></div>
+      <div class="swatches">${accentOptions.map(a => `<div class="swatch ${settings.accent===a.value?'active':''}" style="background:${a.value}" title="${a.name}" onclick="selectAccent('${a.value}')"></div>`).join('')}</div>
+    </div>
+    <div class="settings-row" style="flex-direction:column; align-items:flex-start; gap:8px;">
+      <div><div class="label">Desktop background</div><div class="sub">Pick a wallpaper pattern for the desktop</div></div>
+      <div class="bg-swatches">${backgroundOptions.map(b => `<div class="bg-swatch ${settings.background===b.value?'active':''}" style="background:${b.preview}" title="${b.name}" onclick="applyBackground('${b.value}'); showSettingsPane('appearance')"></div>`).join('')}</div>
+    </div>
+  `,
+  icons: () => `
+    <div class="settings-section-title">Icons</div>
+    <div class="settings-row">
+      <div><div class="label">Icon size</div><div class="sub">Change how large desktop icons appear</div></div>
+      <div class="speed-options">
+        <div class="speed-opt ${settings.iconSize==='small'?'active':''}" onclick="setIconSize('small'); showSettingsPane('icons')">Small</div>
+        <div class="speed-opt ${settings.iconSize==='medium'?'active':''}" onclick="setIconSize('medium'); showSettingsPane('icons')">Medium</div>
+        <div class="speed-opt ${settings.iconSize==='large'?'active':''}" onclick="setIconSize('large'); showSettingsPane('icons')">Large</div>
+      </div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Auto arrange icons</div><div class="sub">Keep icons snapped into a fixed grid</div></div>
+      <div class="toggle ${settings.autoArrange?'on':''}" onclick="toggleAutoArrange(); showSettingsPane('icons')"><div class="knob"></div></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Align icons to grid</div><div class="sub">Snap current icon positions to the nearest grid cell</div></div>
+      <button class="calc-btn" onclick="ctxAlignToGrid()">Align now</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Show desktop icons</div><div class="sub">Hide all icons from the desktop</div></div>
+      <div class="toggle ${settings.showIcons?'on':''}" onclick="toggleShowIcons(); showSettingsPane('icons')"><div class="knob"></div></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Centered clock</div><div class="sub">Show a large clock in the middle of the desktop</div></div>
+      <div class="toggle ${settings.rainmeterClock?'on':''}" onclick="toggleRainmeterClock(); showSettingsPane('icons')"><div class="knob"></div></div>
+    </div>
+  `,
+  mascot: () => `
+    <div class="settings-section-title">Mascot</div>
+    <div class="settings-row">
+      <div><div class="label">Roaming mascot</div><div class="sub">Show a mascot wandering the desktop</div></div>
+      <div class="toggle ${settings.mascot?'on':''}" onclick="toggleSetting('mascot', this)"><div class="knob"></div></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Follow cursor</div><div class="sub">Mascot follows your mouse instead of roaming randomly</div></div>
+      <div class="toggle ${settings.mascotFollow?'on':''}" onclick="toggleSetting('mascotFollow', this)"><div class="knob"></div></div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Speed</div><div class="sub">How fast the mascot moves when roaming</div></div>
+      <div class="speed-options">${speedOptions.map(s => `<div class="speed-opt ${settings.mascotSpeed===s.value?'active':''}" onclick="selectMascotSpeed('${s.value}')">${s.label}</div>`).join('')}</div>
+    </div>
+    <div class="settings-row">
+      <div><div class="label">Icon</div><div class="sub">What the mascot looks like</div></div>
+      <div class="mascot-icon-options">${mascotIconOptions.map(icon => `<div class="mascot-icon-opt ${settings.mascotIcon===icon?'active':''}" onclick="selectMascotIcon('${icon}')">${icon}</div>`).join('')}</div>
+    </div>
+  `,
+  sound: () => `
+    <div class="settings-section-title">Sound</div>
+    <div class="settings-row">
+      <div><div class="label">Buzzer &amp; effects</div><div class="sub">Play a buzzer when the shot clock hits zero</div></div>
+      <div class="toggle ${settings.sound?'on':''}" onclick="toggleSetting('sound', this)"><div class="knob"></div></div>
+    </div>
+  `,
+  about: () => `
+    <div class="settings-section-title">About HoopsOS</div>
+    <div style="font-size:12px; color:var(--text-lo); line-height:1.65;">
+      <p style="margin:0 0 12px;">HoopsOS v3 is a basketball-themed desktop environment built with HTML, CSS &amp; JavaScript. It runs locally in your web browser and does not need an install.</p>
+      <div style="font-weight:700; color:var(--text); margin-bottom:6px;">How to use HoopsOS</div>
+      <ul style="margin:0 0 12px; padding-left:18px;">
+        <li>Double-click an app icon to open it.</li>
+        <li>Use the taskbar at the bottom to launch or minimize pinned apps.</li>
+        <li>Drag windows by their title bar and use the buttons to minimize, maximize, or close them.</li>
+        <li>Right-click the desktop for shortcuts such as Refresh, New Note, and Settings.</li>
+        <li>Use Spotlight at the top to quickly find an app.</li>
+        <li>Open Settings to change the accent color, desktop background, mascot, and sound.</li>
+        <li>The Browser lets you search the web; some websites may need to be opened in a separate browser tab.</li>
+      </ul>
+      <div style="font-weight:700; color:var(--text); margin-bottom:6px;">Quick start</div>
+      <p style="margin:0;">Try Scoreboard for a game, Stat Tracker for stats, Playbook for notes, or Hoops Shootout for a quick game.</p>
+    </div>
+    <div style="margin-top:14px; padding-top:10px; border-top:1px solid var(--border); font-size:11px; color:var(--text-lo);">HoopsOS v3 · Built with HTML, CSS &amp; JavaScript · No servers or installs required.</div>
+  `
+};
+function showSettingsPane(name){
+  document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.toggle('active', el.dataset.pane === name));
+  document.getElementById('settings-content').innerHTML = settingsPanes[name]();
+}
+function selectAccent(hex){ applyAccent(hex); showSettingsPane('appearance'); }
+function selectMascotSpeed(value){
+  settings.mascotSpeed = value;
+  restartMascotLoop();
+  showSettingsPane('mascot');
+}
+function selectMascotIcon(icon){
+  settings.mascotIcon = icon;
+  document.getElementById('mascot').textContent = icon;
+  showSettingsPane('mascot');
+}
+function toggleSetting(key, el){
+  settings[key] = !settings[key];
+  el.classList.toggle('on', settings[key]);
+  if(key === 'mascot'){ document.getElementById('mascot').style.display = settings.mascot ? 'block' : 'none'; document.getElementById('mascot').classList.toggle('bounce-anim', settings.mascot); }
+  if(key === 'mascotFollow'){ document.getElementById('mascot').style.transition = settings.mascotFollow ? 'none' : ''; }
+}
+
+/* ================= TERMINAL ================= */
+let termHistory = [];
+let termHistoryIndex = -1;
+const termCommands = {
+  help: () => `Available commands:
+  help              show this list
+  whoami            show player bio
+  score             show current scoreboard
+  stats             show current stat tracker
+  clock             show game clock status
+  roster            list team apps
+  ls                list installed apps
+  open <app>        launch an app by name
+  clear             clear the terminal
+  date              show current date/time
+  echo <text>       print text back`,
+  whoami: () => `Madhav — #44, Defender
+Basketball, coding, gaming. Built this whole OS myself.`,
+  score: () => `HOME ${scoreA} — ${scoreB} AWAY`,
+  stats: () => Object.entries(stats).map(([k,v]) => `${k}: ${v}`).join('\n'),
+  clock: () => `${formatGameClock(gameClockSeconds)} remaining — Quarter ${gamePeriod}`,
+  roster: () => dockAppOrder.map(id => `${appDefs[id].icon}  ${appDefs[id].title}`).join('\n'),
+  ls: () => dockAppOrder.join('  '),
+  date: () => new Date().toString(),
+  clear: () => { document.getElementById('term-output').textContent = ''; return null; },
+  open: (args) => {
+    const name = args.join(' ').toLowerCase();
+    const match = dockAppOrder.find(id => id === name || appDefs[id].title.toLowerCase() === name || appDefs[id].title.toLowerCase().includes(name));
+    if(!match) return `hoops: no app matching "${args.join(' ')}"`;
+    openWindow(match);
+    return `Opening ${appDefs[match].title}...`;
+  },
+  echo: (args) => args.join(' '),
+};
+function setupTerminal(){
+  const input = document.getElementById('term-input');
+  input.focus();
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      const raw = input.value;
+      input.value = '';
+      runTermCommand(raw);
+    } else if(e.key === 'ArrowUp'){
+      if(termHistory.length){
+        termHistoryIndex = Math.max(0, termHistoryIndex - 1);
+        input.value = termHistory[termHistoryIndex] || '';
+      }
+      e.preventDefault();
+    } else if(e.key === 'ArrowDown'){
+      termHistoryIndex = Math.min(termHistory.length, termHistoryIndex + 1);
+      input.value = termHistory[termHistoryIndex] || '';
+      e.preventDefault();
+    }
+  });
+}
+function runTermCommand(raw){
+  const output = document.getElementById('term-output');
+  const trimmed = raw.trim();
+  output.textContent += `\nuser@hoopsos:~$ ${raw}\n`;
+  if(trimmed){
+    termHistory.push(trimmed);
+    termHistoryIndex = termHistory.length;
+  }
+  if(!trimmed){ output.parentElement.scrollTop = output.parentElement.scrollHeight; return; }
+  const [cmd, ...args] = trimmed.split(/\s+/);
+  const fn = termCommands[cmd.toLowerCase()];
+  if(!fn){
+    output.textContent += `hoops: command not found: ${cmd}\nType 'help' for a list of commands.\n`;
+  } else {
+    const result = fn(args);
+    if(result !== null && result !== undefined) output.textContent += result + '\n';
+  }
+  output.parentElement.scrollTop = output.parentElement.scrollHeight;
+}
+
+/* ================= SCHEDULE (view/edit toggle) ================= */
+let scheduleGames = [
+  { opp:"vs. Ridgeline Hawks", when:"Tue · 7:00 PM" },
+  { opp:"@ Northgate Wolves", when:"Fri · 6:30 PM" },
+  { opp:"vs. Ironwood Bears", when:"Sat · 4:00 PM" },
+  { opp:"@ Summit Vipers", when:"Next Tue · 7:00 PM" },
+];
+let scheduleEditMode = false;
+function setupSchedule(){
+  scheduleEditMode = false;
+  renderSchedule();
+}
+function toggleScheduleEdit(){
+  scheduleEditMode = !scheduleEditMode;
+  renderSchedule();
+}
+function renderSchedule(){
+  const wrap = document.getElementById('sched-rows');
+  const btn = document.getElementById('sched-mode-btn');
+  const addBtn = document.getElementById('sched-add-btn');
+  if(btn) btn.textContent = scheduleEditMode ? 'Done' : 'Edit';
+  if(addBtn) addBtn.style.display = scheduleEditMode ? 'block' : 'none';
+  if(scheduleEditMode){
+    wrap.innerHTML = scheduleGames.map((g, i) => `
+      <div class="sched-row">
+        <input class="sched-opp" value="${g.opp}" oninput="updateScheduleField(${i}, 'opp', this.value)">
+        <input class="sched-when" value="${g.when}" oninput="updateScheduleField(${i}, 'when', this.value)">
+        <button onclick="removeScheduleGame(${i})">×</button>
+      </div>
+    `).join('');
+  } else {
+    wrap.innerHTML = scheduleGames.length
+      ? scheduleGames.map(g => `<div class="sched-item"><span class="opp">${g.opp}</span><span class="when">${g.when}</span></div>`).join('')
+      : `<div class="notif-empty">No games scheduled — tap Edit to add one</div>`;
+  }
+}
+function updateScheduleField(i, field, value){ scheduleGames[i][field] = value; }
+function addScheduleGame(){
+  scheduleGames.push({ opp:"vs. New Opponent", when:"TBD" });
+  renderSchedule();
+}
+function removeScheduleGame(i){
+  scheduleGames.splice(i, 1);
+  renderSchedule();
+}
+
+/* ================= PLAYBOOK (notepad) ================= */
+function setupPlaybook(){
+  const ta = document.getElementById('notes-textarea');
+  const saved = localStorage.getItem('hoopsos-playbook-notes');
+  ta.value = saved !== null ? saved : 'Play 1: Pick and roll, weak-side corner shooter spaces out.';
+}
+function savePlaybookNotes(value){
+  localStorage.setItem('hoopsos-playbook-notes', value);
+}
+
+/* ================= HOOPS SHOOTOUT GAME ================= */
+let hoopsGameState = null;
+function setupHoopsGame(){
+  const canvas = document.getElementById('hoops-canvas');
+  function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; drawHoopsFrame(); }
+  resize();
+  window.addEventListener('resize', resize);
+  canvas.onclick = (e) => {
+    if(!hoopsGameState || !hoopsGameState.running) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const t = hoopsGameState.target;
+    const dist = Math.hypot(x - t.x, y - t.y);
+    if(dist <= t.r){
+      hoopsGameState.score++;
+      document.getElementById('hoops-score').textContent = hoopsGameState.score;
+      playSound('swish');
+      fireConfetti(e.clientX, e.clientY);
+      placeHoopsTarget(canvas);
+    }
+  };
+  hoopsGameState = { running:false, score:0, timeLeft:20, target:{x:60,y:60,r:22} };
+  drawHoopsFrame();
+}
+function placeHoopsTarget(canvas){
+  const r = 18 + Math.random() * 10;
+  hoopsGameState.target = {
+    x: r + Math.random() * (canvas.width - r*2),
+    y: r + Math.random() * (canvas.height - r*2),
+    r
+  };
+  drawHoopsFrame();
+}
+function drawHoopsFrame(){
+  const canvas = document.getElementById('hoops-canvas');
+  if(!canvas || !hoopsGameState) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#0e1017'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const t = hoopsGameState.target;
+  ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2);
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#ff7a29';
+  ctx.fill();
+  ctx.font = `${t.r}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🏀', t.x, t.y);
+  if(!hoopsGameState.running){
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#f3f0e8'; ctx.font = '14px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('Tap Start to play', canvas.width/2, canvas.height/2);
+  }
+}
+let hoopsTimerInterval = null;
+function startHoopsGame(){
+  const canvas = document.getElementById('hoops-canvas');
+  if(!canvas) return;
+  if(hoopsTimerInterval) clearInterval(hoopsTimerInterval);
+  hoopsGameState = { running:true, score:0, timeLeft:20, target:{x:60,y:60,r:22} };
+  document.getElementById('hoops-score').textContent = 0;
+  document.getElementById('hoops-time').textContent = 20;
+  placeHoopsTarget(canvas);
+  hoopsTimerInterval = setInterval(() => {
+    hoopsGameState.timeLeft--;
+    document.getElementById('hoops-time').textContent = hoopsGameState.timeLeft;
+    if(hoopsGameState.timeLeft <= 0){
+      clearInterval(hoopsTimerInterval);
+      hoopsGameState.running = false;
+      drawHoopsFrame();
+      showToast(`🎯 Game over — ${hoopsGameState.score} shots made!`);
+      pushNotification(`🎯 Hoops Shootout: scored ${hoopsGameState.score}`);
+    }
+  }, 1000);
+}
+
+/* ================= PAINT ================= */
+let paintTool = 'pen';
+function setPaintTool(tool){
+  paintTool = tool;
+  document.getElementById('paint-tool-pen').classList.toggle('active', tool === 'pen');
+  document.getElementById('paint-tool-eraser').classList.toggle('active', tool === 'eraser');
+}
+function setupPaint(){
+  const canvas = document.getElementById('paint-canvas');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas(){
+    const img = canvas.toDataURL();
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    ctx.fillStyle = '#0e1017'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    const im = new Image(); im.onload = () => ctx.drawImage(im,0,0); im.src = img;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  setPaintTool('pen');
+  let drawing = false, lastX, lastY;
+  function pos(e){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  function start(e){ drawing = true; const p = pos(e); lastX = p.x; lastY = p.y; }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    ctx.strokeStyle = paintTool === 'eraser' ? '#0e1017' : document.getElementById('paint-color').value;
+    ctx.lineWidth = document.getElementById('paint-size').value;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
+    lastX = p.x; lastY = p.y;
+  }
+  function end(){ drawing = false; }
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, { passive:true });
+  canvas.addEventListener('touchmove', move, { passive:false });
+  canvas.addEventListener('touchend', end);
+  canvas._ctx = ctx;
+}
+function paintClear(){
+  const canvas = document.getElementById('paint-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0e1017'; ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+function paintSave(){
+  const canvas = document.getElementById('paint-canvas');
+  const link = document.createElement('a');
+  link.download = 'hoopsos-drawing.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ================= WEATHER ================= */
+function setupWeather(){
+  const body = document.getElementById('weather-body');
+  const codeMap = {0:'☀️ Clear',1:'🌤️ Mostly clear',2:'⛅ Partly cloudy',3:'☁️ Overcast',45:'🌫️ Fog',51:'🌦️ Drizzle',61:'🌧️ Rain',71:'🌨️ Snow',80:'🌦️ Showers',95:'⛈️ Storms'};
+  function render(temp, code, place){
+    const label = codeMap[code] || '🌡️ Weather';
+    body.innerHTML = `
+      <div style="font-size:12px; color:var(--text-lo);">${place}</div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:52px; margin:8px 0;">${Math.round(temp)}°C</div>
+      <div style="font-size:13px;">${label}</div>
+    `;
+  }
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`)
+        .then(r => r.json())
+        .then(data => render(data.current_weather.temperature, data.current_weather.weathercode, 'Your location'))
+        .catch(() => { body.textContent = 'Could not load weather.'; });
+    }, () => {
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current_weather=true`)
+        .then(r => r.json())
+        .then(data => render(data.current_weather.temperature, data.current_weather.weathercode, 'Dubai (default)'))
+        .catch(() => { body.textContent = 'Could not load weather.'; });
+    });
+  } else {
+    body.textContent = 'Geolocation not available.';
+  }
+}
+
+/* ================= BROWSER ================= */
+// Note: many real websites (YouTube, Instagram, Reddit, etc.) deliberately
+// block being displayed inside an iframe. HoopsOS shows those sites in the
+// frame when allowed and keeps a one-click external fallback when not.
+const BROWSER_HOME = 'https://www.google.com/webhp?igu=1';
+let browserTabs = [{id:1, url:BROWSER_HOME, history:[BROWSER_HOME], index:0}];
+let browserActiveTab = 1;
+let browserNextTabId = 2;
+let browserLoadToken = 0;
+
+function activeBrowserTab(){ return browserTabs.find(t=>t.id===browserActiveTab) || browserTabs[0]; }
+
+function normalizeBrowserUrl(input){
+  input=(input||'').trim();
+  if(!input) return BROWSER_HOME;
+  if(/^https?:\/\//i.test(input)) return input;
+  if(/^localhost(?::\d+)?(?:\/.*)?$/i.test(input)) return 'http://'+input;
+  if(/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(input)) return 'https://'+input;
+  return 'https://www.google.com/search?igu=1&q='+encodeURIComponent(input);
+}
+
+function updateBrowserUI(url, loading=false){
+  const input=document.getElementById('browser-address');
+  const status=document.getElementById('browser-status');
+  const link=document.getElementById('browser-fallback-link');
+  if(input) input.value=url||'';
+  if(status) status.textContent=loading ? 'Loading…' : 'Ready';
+  if(link){
+    link.href=url||BROWSER_HOME;
+    link.textContent='Open externally ↗';
+  }
+}
+
+function browserTitle(url){
+  try{return new URL(url).hostname.replace(/^www\./,'') || 'New Tab';}
+  catch{return 'New Tab';}
+}
+
+function renderBrowserTabs(){
+  const el=document.getElementById('browser-tabs');
+  if(!el) return;
+  el.innerHTML=browserTabs.map(t=>`
+    <div class="browser-tab ${t.id===browserActiveTab?'active':''}" onclick="switchBrowserTab(${t.id})">
+      <span>🌐</span>
+      <span class="browser-tab-title">${browserTitle(t.url)}</span>
+      <button class="browser-tab-close" onclick="event.stopPropagation();closeBrowserTab(${t.id})">×</button>
+    </div>`).join('') +
+    `<button class="browser-new-tab" onclick="newBrowserTab()" title="New tab">＋</button>`;
+}
+
+function showBrowserLoading(url){
+  const l=document.getElementById('browser-loading');
+  if(!l) return;
+  l.classList.remove('hidden');
+  const sub=document.getElementById('browser-loading-sub');
+  if(sub) sub.textContent=browserTitle(url)+' • Connecting';
+}
+function hideBrowserLoading(){ document.getElementById('browser-loading')?.classList.add('hidden'); }
+
+function browserFrameFailed(url, token){
+  if(token !== browserLoadToken) return;
+  hideBrowserLoading();
+  const status=document.getElementById('browser-status');
+  if(status) status.textContent='This site blocks embedded pages — use Open externally ↗';
+}
+
+function loadBrowserFrame(url){
+  const frame=document.getElementById('browser-frame');
+  if(!frame) return;
+  const row = document.getElementById('browser-fallback-row');
+  if(row) row.style.display = 'flex';
+  const token=++browserLoadToken;
+  showBrowserLoading(url);
+  frame.style.visibility='visible';
+  frame.onload=()=>{
+    if(token !== browserLoadToken) return;
+    hideBrowserLoading();
+    const status=document.getElementById('browser-status');
+    if(status) status.textContent='Ready';
+  };
+  frame.src=url;
+  // A blocked iframe often never fires an error event. Give it a short
+  // timeout so the UI never looks frozen.
+  setTimeout(()=>browserFrameFailed(url, token),1800);
+}
+
+function setupBrowser(){
+  const tab=activeBrowserTab();
+  const frame=document.getElementById('browser-frame');
+  if(!frame) return;
+  renderBrowserTabs();
+  updateBrowserUI(tab.url,true);
+  document.getElementById('browser-empty')?.classList.add('hidden');
+  loadBrowserFrame(tab.url);
+}
+
+function switchBrowserTab(id){
+  if(browserTabs.some(t=>t.id===id)){
+    browserActiveTab=id;
+    setupBrowser();
+  }
+}
+
+function newBrowserTab(){
+  const id=browserNextTabId++;
+  browserTabs.push({id,url:BROWSER_HOME,history:[BROWSER_HOME],index:0});
+  browserActiveTab=id;
+  setupBrowser();
+}
+
+function closeBrowserTab(id){
+  if(browserTabs.length===1){
+    browserTabs[0].url=BROWSER_HOME;
+    browserTabs[0].history=[BROWSER_HOME];
+    browserTabs[0].index=0;
+    setupBrowser();
+    return;
+  }
+  const idx=browserTabs.findIndex(t=>t.id===id);
+  browserTabs=browserTabs.filter(t=>t.id!==id);
+  if(browserActiveTab===id) browserActiveTab=browserTabs[Math.max(0,idx-1)].id;
+  setupBrowser();
+}
+
+function browserLoad(url,addHistory=true){
+  const tab=activeBrowserTab();
+  if(!url) return;
+  if(addHistory){
+    tab.history=tab.history.slice(0,tab.index+1);
+    tab.history.push(url);
+    tab.index=tab.history.length-1;
+  }
+  tab.url=url;
+  renderBrowserTabs();
+  updateBrowserUI(url,true);
+  loadBrowserFrame(url);
+}
+
+function browserGo(){
+  const input=document.getElementById('browser-address')?.value||'';
+  browserLoad(normalizeBrowserUrl(input),true);
+}
+function browserQuick(url){ browserLoad(url,true); }
+function browserNav(dir){
+  const tab=activeBrowserTab(), i=tab.index+dir;
+  if(i<0 || i>=tab.history.length) return;
+  tab.index=i;
+  tab.url=tab.history[i];
+  browserLoad(tab.url,false);
+}
+function browserReload(){
+  const tab=activeBrowserTab();
+  loadBrowserFrame(tab.url);
+}
+
+/* ================= WATCH ================= */
+// Official NBA YouTube channel highlight reels, embedded via YouTube's own player
+const videos = [
+  { id:"cObwY45Qh6s", title:"Top 10 Plays — Mar 16" },
+  { id:"DK1SVAzQ-8Y", title:"Top 10 Plays — Jun 10" },
+  { id:"KrgsrJ99QmY", title:"Top 10 Plays — Apr 21" },
+  { id:"g4a0osQ2tEY", title:"Top 10 Plays — Jun 13" },
+  { id:"rhFrz4t5gjQ", title:"Top 10 Plays — Jun 8" },
+  { id:"cuLprHh_BRg", title:"Jordan Vault: Playoff Games" },
+];
+function setupWatch(){
+  const list = document.getElementById('watch-list');
+  list.innerHTML = videos.map((v, i) => `<div class="watch-item" id="watch-item-${i}" onclick="playVideo(${i})">${v.title}</div>`).join('');
+  playVideo(0);
+}
+function playVideo(i){
+  const v = videos[i];
+  const frame = document.getElementById('watch-frame');
+  const link = document.getElementById('watch-link');
+  const caption = document.getElementById('watch-caption');
+  const isLocalFile = location.protocol === 'file:';
+
+  caption.textContent = v.title;
+  link.href = `https://www.youtube.com/watch?v=${v.id}`;
+  document.querySelectorAll('.watch-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('watch-item-' + i);
+  if(el) el.classList.add('active');
+
+  // YouTube Error 153 happens when an embedded player receives no HTTP
+  // Referer. A standalone HTML file (file://) cannot provide that header.
+  // Don't load the broken player in that case; give the user a clean link.
+  if(isLocalFile){
+    frame.src = 'about:blank';
+    frame.style.display = 'none';
+    link.style.display = 'inline-flex';
+    link.textContent = 'Open on YouTube ↗';
+    caption.textContent = `${v.title} · Open this video on YouTube`;
+    return;
+  }
+
+  frame.style.display = 'block';
+  link.style.display = 'inline-flex';
+  link.textContent = 'Watch on YouTube ↗';
+  frame.referrerPolicy = 'origin';
+
+  const params = new URLSearchParams({
+    rel: '0',
+    playsinline: '1',
+    origin: location.origin,
+    widget_referrer: location.href
+  });
+  frame.src = `https://www.youtube.com/embed/${v.id}?${params.toString()}`;
+}
+
+/* ================= HALL OF FAME ================= */
+// Swap `avatar` for a real image URL you have rights to use, e.g. avatar: "https://.../photo.jpg"
+const players = [
+  { initials:"MJ", name:"Michael Jordan", team:"Bulls", color:"#ce1141", fact:"6x NBA champion, widely considered the GOAT.", nbaUrl:"https://www.nba.com/player/893/michael-jordan", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/893.png" },
+  { initials:"LJ", name:"LeBron James", team:"Lakers", color:"#552583", fact:"NBA's all-time leading scorer.", nbaUrl:"https://www.nba.com/player/2544/lebron-james", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png" },
+  { initials:"KB", name:"Kobe Bryant", team:"Lakers", color:"#fdb927", fact:"5x champion, known for the 'Mamba Mentality'.", nbaUrl:"https://www.nba.com/player/977/kobe-bryant", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/977.png" },
+  { initials:"SC", name:"Stephen Curry", team:"Warriors", color:"#1d428a", fact:"Redefined basketball with 3-point shooting.", nbaUrl:"https://www.nba.com/player/201939/stephen-curry", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png" },
+  { initials:"KD", name:"Kevin Durant", team:"Suns", color:"#e56020", fact:"One of the most efficient scorers ever.", nbaUrl:"https://www.nba.com/player/201142/bio", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png" },
+  { initials:"GA", name:"Giannis Antetokounmpo", team:"Bucks", color:"#00471b", fact:"Two-time MVP known as the 'Greek Freak'.", nbaUrl:"https://www.nba.com/player/203507/giannis-antetokounmpo", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png" },
+  { initials:"LB", name:"Larry Bird", team:"Celtics", color:"#007a33", fact:"3x champion and Hall of Fame legend.", nbaUrl:"https://www.nba.com/player/1449", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/1449.png" },
+  { initials:"MB", name:"Magic Johnson", team:"Lakers", color:"#fdb927", fact:"5x champion, pioneered the point-forward role.", nbaUrl:"https://www.nba.com/player/77142/magic-johnson", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png" },
+  { initials:"SO", name:"Shaquille O'Neal", team:"Lakers", color:"#552583", fact:"Dominant center, 4x NBA champion.", nbaUrl:"https://www.nba.com/player/406/shaquille-oneal", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/406.png" },
+];
+function setupGallery(){
+  const grid = document.getElementById('gallery-grid');
+  grid.innerHTML = players.map((p, i) => `
+    <div class="player-card" onclick="showPlayerFact(${i})">
+      <img class="player-avatar" src="${p.headshot}" alt="${p.name} headshot" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="player-avatar player-avatar-fallback" style="background:${p.color};display:none">${p.initials}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-team">${p.team}</div>
+    </div>
+  `).join('');
+}
+function showPlayerFact(i){
+  const p = players[i];
+  document.getElementById('gallery-detail').innerHTML =
+    `${p.name}: ${p.fact}<br><a href="${p.nbaUrl}" target="_blank" rel="noopener" style="color:var(--accent);">View official photo on NBA.com →</a>`;
+}
+
+function openWindow(id){
+  if(openWindows[id]){ focusWindow(id); if(openWindows[id].style.display==='none') minimizeWindow(id); return; }
+  const def = appDefs[id];
+  const win = document.createElement('div');
+  win.className = 'window opening';
+  win.style.width = def.width + 'px';
+  win.style.height = def.height + 'px';
+  win.style.left = (60 + Object.keys(openWindows).length * 26) + 'px';
+  win.style.top = (30 + Object.keys(openWindows).length * 26) + 'px';
+  win.style.zIndex = ++zTop;
+
+  win.innerHTML = `
+    <div class="titlebar" data-drag>
+      <div class="title"><span class="dot" style="background:${def.dot}"></span>${def.title}</div>
+      <div class="win-controls">
+        <button class="win-btn min" onclick="minimizeWindow('${id}')" title="Minimize">–</button>
+        <button class="win-btn max" onclick="toggleMaximize('${id}')" title="Maximize">▢</button>
+        <button class="win-btn close" onclick="closeWindow('${id}')" title="Close">×</button>
+      </div>
+    </div>
+    <div class="win-body">${def.render()}</div>
+    <div class="resize-handle" data-resize></div>
+    <div class="resize-handle edge-e" data-resize-e></div>
+    <div class="resize-handle edge-s" data-resize-s></div>
+  `;
+
+  document.getElementById('desktop').appendChild(win);
+  openWindows[id] = win;
+  makeDraggable(win, id);
+  makeResizable(win);
+  win.addEventListener('mousedown', () => focusWindow(id));
+  setTimeout(() => win.classList.remove('opening'), 200);
+  setDockRunning(id, true);
+  focusWindow(id);
+  showToast(`${def.icon} ${def.title} launched`);
+  playSound('open');
+  pushNotification(`${def.icon} ${def.title} opened`);
+
+  if(id === 'playbook') setupPlaybook();
+  if(id === 'shotclock') setupClockApp();
+  if(id === 'calculator') setupCalculator();
+  if(id === 'stats') setupStats();
+  if(id === 'schedule') setupSchedule();
+  if(id === 'terminal') setupTerminal();
+  if(id === 'watch') setupWatch();
+  if(id === 'gallery') setupGallery();
+  if(id === 'paint') setupPaint();
+  if(id === 'weather') setupWeather();
+  if(id === 'browser') setupBrowser();
+  if(id === 'hoopsgame') setupHoopsGame();
+  if(id === 'settings') showSettingsPane('appearance');
+}
+
+function focusWindow(id){
+  const win = openWindows[id]; if(!win) return;
+  win.style.display = 'flex';
+  win.style.zIndex = ++zTop;
+  document.querySelectorAll('.window').forEach(w => w.classList.remove('focused'));
+  win.classList.add('focused');
+}
+function minimizeWindow(id){ openWindows[id].style.display = 'none'; }
+function toggleMaximize(id){
+  const win = openWindows[id]; if(!win) return;
+  if(win.classList.contains('maximized')){
+    win.classList.remove('maximized');
+    if(win.dataset.prevLeft){ win.style.left = win.dataset.prevLeft; win.style.top = win.dataset.prevTop; win.style.width = win.dataset.prevW; win.style.height = win.dataset.prevH; }
+  } else {
+    win.dataset.prevLeft = win.style.left; win.dataset.prevTop = win.style.top;
+    win.dataset.prevW = win.style.width; win.dataset.prevH = win.style.height;
+    win.classList.add('maximized');
+  }
+}
+function closeWindow(id){
+  const win = openWindows[id];
+  win.classList.add('closing');
+  playSound('close');
+  setTimeout(() => {
+    win.remove();
+    delete openWindows[id];
+    setDockRunning(id, false);
+  }, 160);
+  if(id === 'shotclock' && shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; }
+}
+
+function makeDraggable(win, id){
+  const bar = win.querySelector('[data-drag]');
+  let offsetX, offsetY, dragging = false;
+  function start(clientX, clientY){
+    if(win.classList.contains('maximized')) return;
+    dragging = true; offsetX = clientX - win.offsetLeft; offsetY = clientY - win.offsetTop;
+  }
+  function move(clientX, clientY){
+    if(!dragging) return;
+    win.style.left = Math.max(0, clientX - offsetX) + 'px';
+    win.style.top = Math.max(34, clientY - offsetY) + 'px';
+  }
+  function end(){ dragging = false; }
+  bar.addEventListener('mousedown', (e) => start(e.clientX, e.clientY));
+  bar.addEventListener('dblclick', () => toggleMaximize(id));
+  document.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+  document.addEventListener('mouseup', end);
+  bar.addEventListener('touchstart', (e) => { const t = e.touches[0]; start(t.clientX, t.clientY); }, { passive:true });
+  document.addEventListener('touchmove', (e) => { if(!dragging) return; const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive:true });
+  document.addEventListener('touchend', end);
+}
+function makeResizable(win){
+  function bind(selector, axis){
+    const handle = win.querySelector(selector);
+    if(!handle) return;
+    let resizing = false, startW, startH, startX, startY;
+    function start(clientX, clientY){ resizing = true; startW = win.offsetWidth; startH = win.offsetHeight; startX = clientX; startY = clientY; }
+    function move(clientX, clientY){
+      if(!resizing) return;
+      if(axis !== 's') win.style.width = Math.max(220, startW + (clientX - startX)) + 'px';
+      if(axis !== 'e') win.style.height = Math.max(150, startH + (clientY - startY)) + 'px';
+    }
+    function end(){ resizing = false; }
+    handle.addEventListener('mousedown', (e) => { start(e.clientX, e.clientY); e.stopPropagation(); });
+    document.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+    document.addEventListener('mouseup', end);
+    handle.addEventListener('touchstart', (e) => { const t = e.touches[0]; start(t.clientX, t.clientY); e.stopPropagation(); }, { passive:true });
+    document.addEventListener('touchmove', (e) => { if(!resizing) return; const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive:true });
+    document.addEventListener('touchend', end);
+  }
+  bind('[data-resize]', 'both');
+  bind('[data-resize-e]', 'e');
+  bind('[data-resize-s]', 's');
+}
+
+/* ================= DESKTOP ICONS + DOCK ================= */
+const iconsEl = document.getElementById('icons');
+const dockEl = document.getElementById('dock');
+const dockAppOrder = ['playbook','scoreboard','shotclock','stats','schedule','calculator','terminal','watch','gallery','paint','weather','browser','hoopsgame','locker','settings'];
+// Which apps are important enough to show in the taskbar by default (in priority order)
+const defaultDockPinned = ['scoreboard','shotclock','playbook','schedule','stats','settings'];
+let dockPinned = new Set(defaultDockPinned);
+
+const iconPositions = {};
+dockAppOrder.forEach((id, i) => {
+  const col = Math.floor(i / 5);
+  const row = i % 5;
+  iconPositions[id] = { left: 10 + col * 96, top: 10 + row * 106 };
+});
+
+dockAppOrder.forEach(id => {
+  const def = appDefs[id];
+
+  const icon = document.createElement('div');
+  icon.className = 'icon';
+  icon.dataset.appId = id;
+  icon.style.left = iconPositions[id].left + 'px';
+  icon.style.top = iconPositions[id].top + 'px';
+  icon.ondblclick = () => openWindow(id);
+  icon.innerHTML = `<div class="glyph" style="background:${def.dot}">${def.icon}</div><div class="label">${def.title}</div>`;
+  iconsEl.appendChild(icon);
+  makeIconDraggable(icon, id);
+});
+function rebuildDock(){
+  dockEl.innerHTML = '';
+  // Show pinned/important apps first, in priority order, then any other pinned apps
+  const orderedPinned = dockAppOrder.filter(id => dockPinned.has(id));
+  orderedPinned.forEach(id => {
+    const def = appDefs[id];
+    const dockIcon = document.createElement('div');
+    dockIcon.className = 'dock-icon';
+    dockIcon.id = 'dock-' + id;
+    dockIcon.style.background = def.dot;
+    dockIcon.innerHTML = `${def.icon}<div class="run-dot"></div>`;
+    dockIcon.title = def.title;
+    dockIcon.onclick = () => { if(openWindows[id] && openWindows[id].style.display !== 'none'){ minimizeWindow(id); } else { openWindow(id); } };
+    dockIcon.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); openContextMenuAt(e.clientX, e.clientY, iconMenuHTML(id)); };
+    dockEl.appendChild(dockIcon);
+    if(openWindows[id]) setDockRunning(id, true);
+  });
+}
+function toggleDockPin(id){
+  if(dockPinned.has(id)){ dockPinned.delete(id); } else { dockPinned.add(id); }
+  rebuildDock();
+  closeCtx();
+  showToast(dockPinned.has(id) ? `📌 ${appDefs[id].title} pinned to taskbar` : `${appDefs[id].title} removed from taskbar`);
+}
+rebuildDock();
+function setDockRunning(id, running){
+  const el = document.getElementById('dock-' + id);
+  if(!el) return;
+  el.classList.toggle('running', running);
+  if(running){
+    el.classList.remove('bounce');
+    void el.offsetWidth;
+    el.classList.add('bounce');
+  }
+}
+
+function makeIconDraggable(icon, id){
+  let offsetX, offsetY, dragging = false, moved = false;
+  let lastTapTime = 0;
+
+  function start(clientX, clientY){
+    dragging = true; moved = false;
+    offsetX = clientX - icon.offsetLeft;
+    offsetY = clientY - icon.offsetTop;
+  }
+  function move(clientX, clientY){
+    if(!dragging) return;
+    moved = true;
+    const desktop = document.getElementById('desktop');
+    const dockClearance = 84;
+    const left = Math.max(0, Math.min(desktop.clientWidth - 88, clientX - offsetX));
+    const top = Math.max(0, Math.min(desktop.clientHeight - 96 - dockClearance, clientY - offsetY));
+    icon.style.left = left + 'px';
+    icon.style.top = top + 'px';
+    iconPositions[id] = { left, top };
+  }
+  function end(clientX, clientY){
+    dragging = false;
+    if(moved && document.querySelector(`.icon[data-app-id="${id}"]`)?.dataset.folder !== 'true'){
+      const folderEl = document.elementFromPoint(clientX, clientY)?.closest('.icon[data-folder="true"]');
+      if(folderEl && folderEl.dataset.appId !== id){
+        addAppToFolder(folderEl.dataset.appId, id);
+        icon.style.display = 'none';
+      }
+    }
+  }
+
+  icon.addEventListener('mousedown', (e) => start(e.clientX, e.clientY));
+  document.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+  document.addEventListener('mouseup', (e) => end(e.clientX, e.clientY));
+
+  // Touch: drag to move, and manual double-tap detection (native dblclick is unreliable on touch)
+  icon.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    start(t.clientX, t.clientY);
+  }, { passive:true });
+  icon.addEventListener('touchmove', (e) => {
+    if(!dragging) return;
+    const t = e.touches[0];
+    move(t.clientX, t.clientY);
+  }, { passive:true });
+  icon.addEventListener('touchend', (e) => {
+    const t = e.changedTouches[0];
+    end(t.clientX, t.clientY);
+    if(!moved){
+      const now = Date.now();
+      if(now - lastTapTime < 400){
+        if(icon.dataset.folder === 'true'){ openFolder(id); } else { openWindow(id); }
+        lastTapTime = 0;
+      } else {
+        lastTapTime = now;
+      }
+    }
+  });
+}
+
+/* ================= TOASTS ================= */
+function showToast(text){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+/* ================= NOTIFICATION CENTER ================= */
+let notifications = [];
+function pushNotification(text){
+  notifications.unshift({ text, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), read:false });
+  notifications = notifications.slice(0, 20);
+  renderNotifications();
+}
+function renderNotifications(){
+  const badge = document.getElementById('notif-badge');
+  const unreadCount = notifications.filter(n => !n.read).length;
+  badge.textContent = unreadCount;
+  badge.style.display = unreadCount ? 'block' : 'none';
+  const list = document.getElementById('notif-list');
+  list.innerHTML = notifications.length
+    ? notifications.map(n => `<div class="notif-item">${n.text}<div class="notif-time">${n.time}</div></div>`).join('')
+    : `<div class="notif-empty">No notifications yet</div>`;
+}
+function toggleNotifPanel(e){
+  if(e) e.stopPropagation();
+  const panel = document.getElementById('notif-panel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')){
+    notifications.forEach(n => n.read = true);
+    renderNotifications();
+  }
+}
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('notif-panel');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && e.target.id !== 'notif-bell'){
+    panel.classList.remove('open');
+  }
+});
+
+/* ================= CONFETTI PARTICLES ================= */
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+function resizeConfettiCanvas(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+resizeConfettiCanvas();
+window.addEventListener('resize', resizeConfettiCanvas);
+let confettiParticles = [];
+let confettiRAF = null;
+function fireConfetti(originX, originY){
+  const colors = [settings.accent, '#f2d8a7', '#6ee7b7', '#e6484f'];
+  const x = originX !== undefined ? originX : confettiCanvas.width / 2;
+  const y = originY !== undefined ? originY : confettiCanvas.height / 3;
+  for(let i = 0; i < 40; i++){
+    confettiParticles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 8,
+      vy: Math.random() * -6 - 2,
+      size: Math.random() * 5 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      vr: (Math.random() - 0.5) * 12,
+      life: 60 + Math.random() * 30
+    });
+  }
+  if(!confettiRAF) confettiLoop();
+}
+function confettiLoop(){
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rot += p.vr; p.life--;
+    confettiCtx.save();
+    confettiCtx.translate(p.x, p.y);
+    confettiCtx.rotate(p.rot * Math.PI / 180);
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.globalAlpha = Math.max(0, Math.min(1, p.life / 30));
+    confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+    confettiCtx.restore();
+  });
+  confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < confettiCanvas.height + 40);
+  if(confettiParticles.length){ confettiRAF = requestAnimationFrame(confettiLoop); }
+  else { confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiRAF = null; }
+}
+
+/* ================= SPOTLIGHT ================= */
+const spotlight = document.getElementById('spotlight');
+const resultsEl = document.getElementById('spotlight-results');
+spotlight.addEventListener('input', () => {
+  const q = spotlight.value.trim().toLowerCase();
+  resultsEl.innerHTML = '';
+  if(!q){ resultsEl.classList.remove('open'); return; }
+  const matches = Object.keys(appDefs).filter(id => appDefs[id].title.toLowerCase().includes(q));
+  matches.forEach(id => {
+    const item = document.createElement('div');
+    item.className = 'spotlight-item';
+    item.textContent = `${appDefs[id].icon} ${appDefs[id].title}`;
+    item.onclick = () => { openWindow(id); spotlight.value=''; resultsEl.classList.remove('open'); };
+    resultsEl.appendChild(item);
+  });
+  resultsEl.classList.toggle('open', matches.length > 0);
+});
+spotlight.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const q = spotlight.value.trim().toLowerCase();
+    const match = Object.keys(appDefs).find(id => appDefs[id].title.toLowerCase().includes(q));
+    if(match){ openWindow(match); spotlight.value=''; resultsEl.classList.remove('open'); }
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if((e.metaKey || e.ctrlKey) && e.code === 'Space'){
+    e.preventDefault();
+    spotlight.focus();
+    spotlight.select();
+  }
+  if(e.key === 'Escape'){
+    spotlight.value = '';
+    resultsEl.classList.remove('open');
+    spotlight.blur();
+  }
+});
+
+/* ================= CLOCK / WIDGETS ================= */
+function updateClock(){
+  const now = new Date();
+  const t = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('topbar-clock').textContent = now.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'}) + '  ' + t;
+  document.getElementById('lock-time').textContent = t;
+  document.getElementById('lock-date').textContent = now.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
+  const rmTime = document.getElementById('rm-time');
+  const rmDate = document.getElementById('rm-date');
+  if(rmTime) rmTime.textContent = t;
+  if(rmDate) rmDate.textContent = now.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
+}
+updateClock();
+setInterval(updateClock, 1000 * 15);
+
+/* ================= GAME PERIOD CLOCK (widget) ================= */
+let gameClockSeconds = 12 * 60;
+let gameClockInterval = null;
+let gamePeriod = 1;
+function formatGameClock(s){
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+}
+function renderGameClock(){
+  document.getElementById('widget-time').textContent = formatGameClock(gameClockSeconds);
+  document.getElementById('widget-period').textContent = gamePeriod <= 4 ? `Quarter ${gamePeriod}` : `Overtime ${gamePeriod - 4}`;
+}
+function toggleGameClock(){
+  const btn = document.getElementById('gameclock-toggle');
+  if(gameClockInterval){
+    clearInterval(gameClockInterval); gameClockInterval = null; btn.textContent = 'Start';
+  } else {
+    btn.textContent = 'Pause';
+    gameClockInterval = setInterval(() => {
+      gameClockSeconds = Math.max(0, gameClockSeconds - 1);
+      renderGameClock();
+      if(gameClockSeconds === 0){
+        clearInterval(gameClockInterval); gameClockInterval = null; btn.textContent = 'Start';
+        showToast(`🔔 End of ${gamePeriod <= 4 ? 'Quarter ' + gamePeriod : 'Overtime'}`);
+      }
+    }, 1000);
+  }
+}
+function resetGameClock(){
+  if(gameClockInterval){ clearInterval(gameClockInterval); gameClockInterval = null; }
+  const btn = document.getElementById('gameclock-toggle');
+  if(btn) btn.textContent = 'Start';
+  gamePeriod = 1;
+  gameClockSeconds = 12 * 60;
+  renderGameClock();
+}
+function nextPeriod(){
+  gamePeriod++;
+  gameClockSeconds = gamePeriod <= 4 ? 12 * 60 : 5 * 60;
+  renderGameClock();
+}
+renderGameClock();
+
+/* ================= REAL BATTERY STATUS ================= */
+const batteryEl = document.getElementById('battery-display');
+function renderBattery(battery){
+  const pct = Math.round(battery.level * 100);
+  const icon = battery.charging ? '⚡' : '🔋';
+  batteryEl.textContent = `${icon} ${pct}%`;
+}
+if('getBattery' in navigator){
+  navigator.getBattery().then(battery => {
+    renderBattery(battery);
+    battery.addEventListener('levelchange', () => renderBattery(battery));
+    battery.addEventListener('chargingchange', () => renderBattery(battery));
+  }).catch(() => { batteryEl.textContent = '🔋'; });
+} else {
+  // Battery Status API isn't available in this browser (e.g. Safari/iOS) — don't fake a number
+  batteryEl.textContent = '🔋';
+}
+
+/* ================= SOUND ENGINE ================= */
+let sharedAudioCtx = null;
+function getAudioCtx(){
+  if(!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return sharedAudioCtx;
+}
+function playTone(freq, duration, type, gainStart){
+  if(!settings.sound) return;
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(gainStart || 0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch(e){}
+}
+function playSound(kind){
+  if(!settings.sound) return;
+  if(kind === 'open') playTone(660, 0.12, 'sine', 0.08);
+  else if(kind === 'close') playTone(340, 0.1, 'sine', 0.08);
+  else if(kind === 'score'){ playTone(880, 0.1, 'triangle', 0.1); setTimeout(() => playTone(1180, 0.14, 'triangle', 0.08), 90); }
+  else if(kind === 'swish'){ playTone(1400, 0.18, 'sine', 0.06); }
+  else if(kind === 'click') playTone(500, 0.05, 'square', 0.04);
+  else if(kind === 'buzzer') playBuzzer();
+}
+function playBuzzer(){
+  if(!settings.sound) return;
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 220;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.6);
+  } catch(e){}
+}
+
+/* ================= SCOREBOARD ================= */
+let scoreA = 0, scoreB = 0;
+function syncWidgetScore(){ document.getElementById('widget-score-a').textContent = scoreA; document.getElementById('widget-score-b').textContent = scoreB; }
+function bumpScore(team, delta){
+  if(team === 'a'){ scoreA = Math.max(0, scoreA + delta); document.getElementById('score-a').textContent = scoreA; }
+  else { scoreB = Math.max(0, scoreB + delta); document.getElementById('score-b').textContent = scoreB; }
+  syncWidgetScore();
+  if(delta > 0){ playSound('score'); fireConfetti(); }
+}
+function resetScore(){ scoreA = 0; scoreB = 0; document.getElementById('score-a').textContent = 0; document.getElementById('score-b').textContent = 0; syncWidgetScore(); }
+
+/* ================= SHOT CLOCK + BUZZER ================= */
+/* ================= CLOCK APP: shot clock / timer / stopwatch ================= */
+let clockMode = 'shot';
+let shotClockSeconds = 24;
+let shotClockInterval = null;
+let timerSeconds = 0;
+let timerInterval = null;
+let timerRunning = false;
+let stopwatchMs = 0;
+let stopwatchInterval = null;
+let stopwatchRunning = false;
+
+function switchClockMode(mode){
+  clockMode = mode;
+  document.querySelectorAll('.clock-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  renderClockModeBody();
+}
+function renderClockModeBody(){
+  const body = document.getElementById('clock-mode-body');
+  if(!body) return;
+  if(clockMode === 'shot'){
+    body.innerHTML = `
+      <div class="shotclock-display" id="shotclock-display">${shotClockSeconds}</div>
+      <div class="shotclock-btns">
+        <button class="primary" id="shotclock-toggle" onclick="toggleShotClock()">${shotClockInterval ? 'Pause' : 'Start'}</button>
+        <button onclick="setShotClock(24)">Reset 24</button>
+        <button onclick="setShotClock(14)">Reset 14</button>
+      </div>
+    `;
+  } else if(clockMode === 'timer'){
+    body.innerHTML = `
+      <div class="shotclock-display" id="timer-display">${formatGameClock(timerSeconds)}</div>
+      <div class="timer-set-row">
+        <input type="number" id="timer-min" min="0" max="99" value="${Math.floor(timerSeconds/60)}" placeholder="mm"> :
+        <input type="number" id="timer-sec" min="0" max="59" value="${timerSeconds%60}" placeholder="ss">
+        <button class="calc-btn" onclick="applyTimerInput()">Set</button>
+      </div>
+      <div class="shotclock-btns">
+        <button class="primary" id="timer-toggle" onclick="toggleTimer()">${timerRunning ? 'Pause' : 'Start'}</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+    `;
+  } else {
+    body.innerHTML = `
+      <div class="shotclock-display" id="stopwatch-display">${formatStopwatch(stopwatchMs)}</div>
+      <div class="shotclock-btns">
+        <button class="primary" id="stopwatch-toggle" onclick="toggleStopwatch()">${stopwatchRunning ? 'Pause' : 'Start'}</button>
+        <button onclick="resetStopwatch()">Reset</button>
+      </div>
+    `;
+  }
+}
+
+// Shot clock
+function setShotClock(n){
+  if(shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; }
+  shotClockSeconds = n;
+  const disp = document.getElementById('shotclock-display'); if(disp) disp.textContent = shotClockSeconds;
+  const btn = document.getElementById('shotclock-toggle'); if(btn) btn.textContent = 'Start';
+}
+function toggleShotClock(){
+  const btn = document.getElementById('shotclock-toggle');
+  if(shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; btn.textContent = 'Start'; }
+  else {
+    btn.textContent = 'Pause';
+    shotClockInterval = setInterval(() => {
+      shotClockSeconds = Math.max(0, shotClockSeconds - 1);
+      const disp = document.getElementById('shotclock-display');
+      if(disp) disp.textContent = shotClockSeconds;
+      if(shotClockSeconds === 0){ clearInterval(shotClockInterval); shotClockInterval = null; btn.textContent = 'Start'; playBuzzer(); showToast('⏱ Shot clock violation!'); }
+    }, 1000);
+  }
+}
+
+// Custom countdown timer
+function applyTimerInput(){
+  const min = parseInt(document.getElementById('timer-min').value) || 0;
+  const sec = parseInt(document.getElementById('timer-sec').value) || 0;
+  timerSeconds = Math.max(0, min * 60 + sec);
+  document.getElementById('timer-display').textContent = formatGameClock(timerSeconds);
+}
+function toggleTimer(){
+  const btn = document.getElementById('timer-toggle');
+  if(timerRunning){
+    clearInterval(timerInterval); timerInterval = null; timerRunning = false; btn.textContent = 'Start';
+  } else {
+    if(timerSeconds <= 0){ showToast('⏱ Set a time first'); return; }
+    timerRunning = true; btn.textContent = 'Pause';
+    timerInterval = setInterval(() => {
+      timerSeconds = Math.max(0, timerSeconds - 1);
+      const disp = document.getElementById('timer-display'); if(disp) disp.textContent = formatGameClock(timerSeconds);
+      if(timerSeconds === 0){ clearInterval(timerInterval); timerInterval = null; timerRunning = false; btn.textContent = 'Start'; playBuzzer(); showToast('⏱ Timer done!'); }
+    }, 1000);
+  }
+}
+function resetTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+  timerRunning = false; timerSeconds = 0;
+  renderClockModeBody();
+}
+
+// Stopwatch
+function formatStopwatch(ms){
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const cs = Math.floor((ms % 1000) / 10);
+  return `${m}:${s<10?'0':''}${s}.${cs<10?'0':''}${cs}`;
+}
+function toggleStopwatch(){
+  const btn = document.getElementById('stopwatch-toggle');
+  if(stopwatchRunning){
+    clearInterval(stopwatchInterval); stopwatchInterval = null; stopwatchRunning = false; btn.textContent = 'Start';
+  } else {
+    stopwatchRunning = true; btn.textContent = 'Pause';
+    const startTime = Date.now() - stopwatchMs;
+    stopwatchInterval = setInterval(() => {
+      stopwatchMs = Date.now() - startTime;
+      const disp = document.getElementById('stopwatch-display'); if(disp) disp.textContent = formatStopwatch(stopwatchMs);
+    }, 30);
+  }
+}
+function resetStopwatch(){
+  if(stopwatchInterval){ clearInterval(stopwatchInterval); stopwatchInterval = null; }
+  stopwatchRunning = false; stopwatchMs = 0;
+  renderClockModeBody();
+}
+function setupClockApp(){
+  renderClockModeBody();
+}
+
+/* ================= CALCULATOR ================= */
+function setupCalculator(){
+  const grid = document.getElementById('calc-grid');
+  const screen = document.getElementById('calc-screen');
+  const isOperator = (c) => ['/','*','-','+'].includes(c);
+  const keys = ['7','8','9','/','4','5','6','*','1','2','3','-','C','0','=','+'];
+  let expr = '';
+  let justEvaluated = false; // true right after "=" produced a result
+
+  keys.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'calc-btn' + (isOperator(k) ? ' op' : '') + (k === '=' ? ' eq' : '');
+    btn.textContent = k;
+    btn.onclick = () => {
+      if(k === 'C'){
+        expr = '';
+        justEvaluated = false;
+      } else if(k === '='){
+        try{
+          const result = Function('"use strict"; return (' + expr + ')')();
+          expr = Number.isFinite(result) ? String(result) : 'Error';
+        } catch(e){ expr = 'Error'; }
+        justEvaluated = true;
+      } else if(isOperator(k)){
+        if(isOperator(expr.slice(-1))){
+          // Replace the last operator instead of stacking two in a row (e.g. 5++ )
+          expr = expr.slice(0, -1) + k;
+        } else if(expr === '' && k !== '-'){
+          // Ignore leading operators (except a leading minus for negative numbers)
+        } else {
+          expr += k;
+        }
+        justEvaluated = false;
+      } else {
+        // Digit or decimal point
+        if(justEvaluated || expr === 'Error'){ expr = ''; }
+        expr += k;
+        justEvaluated = false;
+      }
+      screen.textContent = expr || '0';
+    };
+    grid.appendChild(btn);
+  });
+}
+
+/* ================= STAT TRACKER ================= */
+let stats = { Points:0, Rebounds:0, Assists:0, Steals:0 };
+function setupStats(){
+  const wrap = document.getElementById('stat-rows');
+  wrap.innerHTML = Object.keys(stats).map(name => `
+    <div class="stat-row">
+      <div class="stat-name">${name}</div>
+      <div class="stat-controls">
+        <button onclick="bumpStat('${name}',-1)">–</button>
+        <div class="stat-num" id="stat-${name}">${stats[name]}</div>
+        <button onclick="bumpStat('${name}',1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+function bumpStat(name, d){
+  stats[name] = Math.max(0, stats[name] + d);
+  const el = document.getElementById('stat-' + name);
+  if(el) el.textContent = stats[name];
+}
+function resetStats(){
+  Object.keys(stats).forEach(k => stats[k] = 0);
+  setupStats();
+}
+
+/* ================= MASCOT ================= */
+const mascot = document.getElementById('mascot');
+let mascotRoamTimer = null;
+let mouseTargetX = 220, mouseTargetY = 260;
+let mascotX = 220, mascotY = 260;
+let mascotFollowRAF = null;
+
+function currentSpeed(){
+  return speedOptions.find(s => s.value === settings.mascotSpeed) || speedOptions[1];
+}
+function roamMascot(){
+  if(!settings.mascot || settings.mascotFollow) return;
+  const desktop = document.getElementById('desktop');
+  const maxX = desktop.clientWidth - 60;
+  const maxY = desktop.clientHeight - 60 - 84;
+  mascot.style.left = Math.max(20, Math.random() * maxX) + 'px';
+  mascot.style.top = Math.max(20, Math.random() * maxY) + 'px';
+}
+function restartMascotLoop(){
+  if(mascotRoamTimer) clearInterval(mascotRoamTimer);
+  const speed = currentSpeed();
+  mascot.style.transition = settings.mascotFollow ? 'none' : `left ${speed.transition}s ease-in-out, top ${speed.transition}s ease-in-out`;
+  mascotRoamTimer = setInterval(roamMascot, speed.interval);
+}
+
+// Smooth, lively mouse-follow: the mascot trails the cursor (lerp) with a dribble-style bounce,
+// instead of snapping dead-on to the exact mouse position.
+document.addEventListener('mousemove', (e) => {
+  mouseTargetX = e.clientX - 15;
+  mouseTargetY = e.clientY - 15;
+});
+function followLoop(){
+  if(settings.mascot && settings.mascotFollow){
+    const speed = currentSpeed();
+    const ease = speed.value === 'fast' ? 0.28 : speed.value === 'slow' ? 0.08 : 0.16;
+    mascotX += (mouseTargetX - mascotX) * ease;
+    mascotY += (mouseTargetY - mascotY) * ease;
+    const dx = mouseTargetX - mascotX;
+    const tilt = Math.max(-18, Math.min(18, dx * 0.4));
+    mascot.style.left = mascotX + 'px';
+    mascot.style.top = mascotY + 'px';
+    mascot.style.setProperty('--mascot-tilt', tilt + 'deg');
+  } else {
+    mascot.style.setProperty('--mascot-tilt', '0deg');
+  }
+  mascotFollowRAF = requestAnimationFrame(followLoop);
+}
+followLoop();
+
+mascot.textContent = settings.mascotIcon;
+mascot.style.left = '220px';
+mascot.style.top = '260px';
+mascot.style.display = settings.mascot ? 'block' : 'none';
+mascot.classList.toggle('bounce-anim', settings.mascot);
+restartMascotLoop();
+</script>
+
+</body>
+</html>
