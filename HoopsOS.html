@@ -69,7 +69,6 @@ html,body {
   font-size:31px;
   background:var(--accent);
   box-shadow:0 10px 30px rgba(255,122,41,.28);
-  animation:bootBall 1.4s ease-in-out infinite;
 }
 .boot-brand h1 {
   margin:0;
@@ -115,12 +114,6 @@ html,body {
   overflow:hidden;
   background:rgba(0,0,0,.12);
 }
-#boot-log .ok {
-  color:#6ee7b7;
-}
-#boot-log .tag {
-  color:var(--text-lo);
-}
 .boot-progress {
   height:3px;
   background:#0d1018;
@@ -160,14 +153,6 @@ html,body {
 @keyframes spin {
   to {
     transform:rotate(360deg);
-  }
-}
-@keyframes bootBall {
-  0%,100% {
-    transform:translateY(0) rotate(0);
-  }
-  50% {
-    transform:translateY(-6px) rotate(8deg);
   }
 }
 @keyframes bootProgress {
@@ -293,9 +278,6 @@ html,body {
   cursor:pointer;
   position:relative;
 }
-#topbar .menu-item:hover {
-  color:var(--text-hi);
-}
 .menu-dropdown {
   position:absolute;
   top:28px;
@@ -308,12 +290,6 @@ html,body {
   box-shadow:0 20px 50px rgba(0,0,0,0.5);
   display:none;
   z-index:900;
-}
-.menu-dropdown.open {
-  display:block;
-}
-.menu-dropdown .ctx-item {
-  font-size:12px;
 }
 #topbar .right {
   display:flex;
@@ -398,9 +374,6 @@ html,body {
   outline:none;
   box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
-#spotlight::placeholder {
-  color:var(--text-lo);
-}
 #spotlight-results {
   margin-top:6px;
   background:var(--bg-panel);
@@ -409,16 +382,10 @@ html,body {
   overflow:hidden;
   display:none;
 }
-#spotlight-results.open {
-  display:block;
-}
 .spotlight-item {
   padding:9px 14px;
   font-size:13px;
   cursor:pointer;
-}
-.spotlight-item:hover {
-  background:rgba(255,255,255,0.07);
 }
 #desktop {
   position:fixed;
@@ -468,10 +435,6 @@ html,body {
   font-size:28px;
   color:var(--text-hi);
 }
-#widget-clock .date {
-  font-size:11px;
-  color:var(--text-lo);
-}
 .widget-clock-controls {
   display:flex;
   gap:6px;
@@ -479,16 +442,13 @@ html,body {
 }
 .widget-clock-controls button {
   flex:1;
-  background:var(--bg-panel-2);
-  border:1px solid var(--border);
-  color:var(--text-hi);
   border-radius:6px;
   padding:5px 0;
-  cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
   font-size:10px;
 }
-.widget-clock-controls button.primary {
+.widget-clock-controls button.primary,
+.shotclock-btns button.primary {
   background:var(--accent);
   color:#0c0e14;
   font-weight:700;
@@ -617,9 +577,6 @@ html,body {
   text-transform:uppercase;
   margin-top:6px;
 }
-#desktop.rainmeter-hidden #rainmeter-clock {
-  display:none;
-}
 #icons {
   position:absolute;
   inset:0;
@@ -728,10 +685,6 @@ html,body {
   height:8px;
   border-radius:50%;
 }
-.win-controls {
-  display:flex;
-  gap:8px;
-}
 .win-btn {
   width:16px;
   height:16px;
@@ -834,17 +787,9 @@ html,body {
   min-width:80px;
   text-align:center;
 }
-.score-btns {
-  display:flex;
-  gap:6px;
-}
 .score-btns button {
-  background:var(--bg-panel-2);
-  border:1px solid var(--border);
-  color:var(--text-hi);
   border-radius:6px;
   padding:4px 10px;
-  cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
 }
 .score-divider {
@@ -882,20 +827,10 @@ html,body {
   flex-wrap:wrap;
 }
 .shotclock-btns button {
-  background:var(--bg-panel-2);
-  border:1px solid var(--border);
-  color:var(--text-hi);
   border-radius:8px;
   padding:8px 14px;
-  cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
   font-size:12px;
-}
-.shotclock-btns button.primary {
-  background:var(--accent);
-  color:#0c0e14;
-  font-weight:700;
-  border:none;
 }
 .clock-tabs {
   display:flex;
@@ -951,21 +886,25 @@ html,body {
   grid-template-columns:repeat(4,1fr);
   gap:6px;
 }
-.calc-btn {
+.calc-btn,
+.shotclock-btns button,
+.score-btns button,
+.stat-controls button,
+.widget-clock-controls button {
   background:var(--bg-panel-2);
   border:1px solid var(--border);
   color:var(--text-hi);
+  cursor:pointer;
+}
+.calc-btn {
   border-radius:8px;
   padding:10px 0;
-  cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
   font-size:14px;
 }
-.calc-btn:hover {
+.calc-btn:hover,
+.toolbar-btn:hover {
   background:#262c4d;
-}
-.calc-btn.op {
-  color:var(--accent);
 }
 .calc-btn.eq {
   background:var(--accent);
@@ -978,9 +917,6 @@ html,body {
   justify-content:space-between;
   padding:8px 0;
   border-bottom:1px solid var(--border);
-}
-.stat-row:last-child {
-  border-bottom:none;
 }
 .stat-name {
   font-size:13px;
@@ -998,13 +934,9 @@ html,body {
   text-align:center;
 }
 .stat-controls button {
-  background:var(--bg-panel-2);
-  border:1px solid var(--border);
-  color:var(--text-hi);
   border-radius:6px;
   width:24px;
   height:24px;
-  cursor:pointer;
 }
 .stat-reset {
   display:block;
@@ -1025,14 +957,8 @@ html,body {
   border-bottom:1px solid var(--border);
   font-size:12px;
 }
-.sched-item:last-child {
-  border-bottom:none;
-}
 .sched-item .opp {
   font-weight:700;
-}
-.sched-item .when {
-  color:var(--text-lo);
 }
 .sched-row {
   display:flex;
@@ -1040,9 +966,6 @@ html,body {
   gap:6px;
   padding:7px 0;
   border-bottom:1px solid var(--border);
-}
-.sched-row:last-child {
-  border-bottom:none;
 }
 .sched-row input {
   background:var(--bg-panel-2);
@@ -1156,9 +1079,6 @@ html,body {
   cursor:pointer;
   font-size:11px;
 }
-.watch-item:hover {
-  border-color:var(--accent);
-}
 .watch-item.active {
   border-color:var(--accent);
   background:rgba(255,122,41,0.1);
@@ -1234,82 +1154,56 @@ html,body {
 .bg-layer.bg-unsplash-hoop {
   background:#0c0e14 url("https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
-.bg-layer.bg-unsplash-hoop::before {
+[class*="bg-unsplash-"]::before {
   content:"";
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.32);
   pointer-events:none;
+}
+.bg-layer.bg-unsplash-hoop::before {
+  background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-court {
   background:#0c0e14 url("https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-court::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.32);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-blue {
   background:#0c0e14 url("https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-blue::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.32);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-aerial {
   background:#0c0e14 url("https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-aerial::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.32);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-ball-ring {
   background:#0c0e14 url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-ball-ring::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.32);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-silhouette {
   background:#0c0e14 url('https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-silhouette::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.28);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-grayscale {
   background:#0c0e14 url('https://unsplash.com/photos/UFIZodJgScQ/download?force=true') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-grayscale::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.30);
-  pointer-events:none;
 }
 .bg-layer.bg-unsplash-illustration {
   background:#0c0e14 url('https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-illustration::before {
-  content:"";
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,0.24);
-  pointer-events:none;
 }
 .bg-swatch {
   width:44px;
@@ -1319,17 +1213,10 @@ html,body {
   border:2px solid var(--border);
   background-size:cover;
 }
-.bg-swatch.active {
-  border-color:var(--accent);
-}
 .bg-swatches {
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-}
-.mascot-icon-options {
-  display:flex;
-  gap:8px;
 }
 .mascot-icon-opt {
   width:32px;
@@ -1343,9 +1230,12 @@ html,body {
   font-size:16px;
   cursor:pointer;
 }
+.watch-item:hover,
+.bg-swatch.active,
 .mascot-icon-opt.active {
   border-color:var(--accent);
 }
+.score-btns,
 .speed-options {
   display:flex;
   gap:6px;
@@ -1374,9 +1264,6 @@ html,body {
   box-shadow:0 20px 50px rgba(0,0,0,0.5);
   display:none;
 }
-#context-menu.open {
-  display:block;
-}
 .ctx-item {
   display:flex;
   align-items:center;
@@ -1388,6 +1275,7 @@ html,body {
   color:var(--text-hi);
   position:relative;
 }
+.spotlight-item:hover,
 .ctx-item:hover {
   background:rgba(255,255,255,0.07);
 }
@@ -1417,9 +1305,6 @@ html,body {
   padding:6px;
   box-shadow:0 20px 50px rgba(0,0,0,0.5);
 }
-.ctx-item.has-submenu:hover .ctx-submenu {
-  display:block;
-}
 .term-body {
   background:#0a0c10;
   height:100%;
@@ -1436,9 +1321,11 @@ html,body {
   white-space:pre-wrap;
   word-break:break-word;
 }
+.calc-btn.op,
 .term-line-cmd {
   color:var(--accent);
 }
+#boot-log .ok,
 .term-line-ok {
   color:#6ee7b7;
 }
@@ -1480,9 +1367,6 @@ html,body {
   height:32px;
   box-sizing:border-box;
   transition: background 0.15s ease, border-color 0.15s ease;
-}
-.toolbar-btn:hover {
-  background:#262c4d;
 }
 .toolbar-btn.active {
   background:rgba(255,122,41,0.16);
@@ -1562,9 +1446,6 @@ html,body {
   cursor:pointer;
   line-height:1;
   padding:2px 4px;
-}
-.browser-status-close:hover {
-  color:var(--text-hi);
 }
 .browser-shell {
   margin:-14px;
@@ -1677,9 +1558,6 @@ html,body {
   color:#555;
   backdrop-filter:none;
 }
-.browser-loading.hidden {
-  display:none;
-}
 .browser-loader-ring {
   width:24px;
   height:24px;
@@ -1716,6 +1594,8 @@ html,body {
   color:var(--text-hi);
   text-align:center;
 }
+#desktop.rainmeter-hidden #rainmeter-clock,
+.browser-loading.hidden,
 .browser-empty.hidden {
   display:none;
 }
@@ -1727,6 +1607,7 @@ html,body {
   font-size:24px;
   letter-spacing:1px;
 }
+#widget-clock .date,
 .browser-empty-sub {
   font-size:11px;
   color:var(--text-lo);
@@ -1752,6 +1633,9 @@ html,body {
   border-color:var(--accent);
   color:var(--accent);
 }
+#boot-log .tag,
+#spotlight::placeholder,
+.sched-item .when,
 .browser-status {
   color:var(--text-lo);
 }
@@ -1774,6 +1658,8 @@ html,body {
   color:var(--text-lo);
   border-left:2px solid transparent;
 }
+#topbar .menu-item:hover,
+.browser-status-close:hover,
 .settings-nav-item:hover {
   color:var(--text-hi);
 }
@@ -1800,9 +1686,13 @@ html,body {
   padding:10px 0;
   border-bottom:1px solid var(--border);
 }
+.stat-row:last-child,
+.sched-item:last-child,
+.sched-row:last-child,
 .settings-row:last-child {
   border-bottom:none;
 }
+.menu-dropdown .ctx-item,
 .settings-row .label {
   font-size:12px;
 }
@@ -1839,6 +1729,8 @@ html,body {
   left:20px;
   background:#0c0e14;
 }
+.win-controls,
+.mascot-icon-options,
 .swatches {
   display:flex;
   gap:8px;
@@ -1923,6 +1815,10 @@ html,body {
   display:none;
   box-shadow:0 0 6px var(--accent);
 }
+.menu-dropdown.open,
+#spotlight-results.open,
+#context-menu.open,
+.ctx-item.has-submenu:hover .ctx-submenu,
 .dock-icon.running .run-dot {
   display:block;
 }
@@ -2017,8 +1913,6 @@ html,body {
   </div>
 </div>
 
-<canvas id="confetti-canvas" style="position:fixed; inset:0; z-index:9400; pointer-events:none;"></canvas>
-
 <div id="notif-panel">
   <div class="notif-header">Notifications</div>
   <div id="notif-list"></div>
@@ -2069,7 +1963,6 @@ html,body {
 </div>
 
 <script>
-
 const bootLines = [
   ["[ 0.0012 ]", "Inflating basketball to regulation PSI..."],
   ["[ 0.0480 ]", "Loading roster.json..."],
@@ -2096,7 +1989,6 @@ function typeBootLine(){
 typeBootLine();
 function enterDesktop(){
   document.getElementById('lockscreen').classList.add('hide');
-  fireConfetti(window.innerWidth / 2, 120);
   playSound('open');
   
   setTimeout(() => {
@@ -2104,7 +1996,6 @@ function enterDesktop(){
     setTimeout(() => showSettingsPane('about'), 0);
   }, 450);
 }
-
 
 const settings = {
   accent: '#ff7a29',
@@ -2176,7 +2067,7 @@ function applyBackground(name){
   const nextLayerKey = activeBgLayer === 'a' ? 'b' : 'a';
   const nextEl = document.getElementById('bg-layer-' + nextLayerKey);
   nextEl.className = 'bg-layer bg-' + name;
-  void nextEl.offsetWidth; // force reflow so the transition actually runs
+  void nextEl.offsetWidth;
   nextEl.classList.add('active');
   currentEl.classList.remove('active');
   activeBgLayer = nextLayerKey;
@@ -2185,7 +2076,6 @@ function applyAccent(hex){
   settings.accent = hex;
   document.documentElement.style.setProperty('--accent', hex);
 }
-
 
 function toggleMenu(e, name){
   e.stopPropagation();
@@ -2198,7 +2088,6 @@ function closeMenus(){
   document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.remove('open'));
 }
 document.addEventListener('click', closeMenus);
-
 
 const contextMenu = document.getElementById('context-menu');
 function desktopMenuHTML(){
@@ -2262,7 +2151,6 @@ document.getElementById('desktop').addEventListener('contextmenu', (e) => {
 document.addEventListener('click', (e) => {
   if(!contextMenu.contains(e.target)){ contextMenu.classList.remove('open'); }
 });
-
 
 let longPressTimer = null;
 let longPressFired = false;
@@ -2402,8 +2290,6 @@ function ctxOpenSettings(pane){
   setTimeout(() => showSettingsPane(pane), 0);
   closeCtx();
 }
-
-
 
 let zTop = 1000;
 const openWindows = {};
@@ -2681,7 +2567,6 @@ function toggleSetting(key, el){
   if(key === 'mascotFollow'){ document.getElementById('mascot').style.transition = settings.mascotFollow ? 'none' : ''; }
 }
 
-
 let termHistory = [];
 let termHistoryIndex = -1;
 const termCommands = {
@@ -2756,7 +2641,6 @@ function runTermCommand(raw){
   output.parentElement.scrollTop = output.parentElement.scrollHeight;
 }
 
-
 let scheduleGames = [
   { opp:"vs. Ridgeline Hawks", when:"Tue · 7:00 PM" },
   { opp:"@ Northgate Wolves", when:"Fri · 6:30 PM" },
@@ -2802,7 +2686,6 @@ function removeScheduleGame(i){
   renderSchedule();
 }
 
-
 function setupPlaybook(){
   const ta = document.getElementById('notes-textarea');
   const saved = localStorage.getItem('hoopsos-playbook-notes');
@@ -2811,7 +2694,6 @@ function setupPlaybook(){
 function savePlaybookNotes(value){
   localStorage.setItem('hoopsos-playbook-notes', value);
 }
-
 
 let hoopsGameState = null;
 function setupHoopsGame(){
@@ -2829,7 +2711,6 @@ function setupHoopsGame(){
       hoopsGameState.score++;
       document.getElementById('hoops-score').textContent = hoopsGameState.score;
       playSound('swish');
-      fireConfetti(e.clientX, e.clientY);
       placeHoopsTarget(canvas);
     }
   };
@@ -2884,7 +2765,6 @@ function startHoopsGame(){
     }
   }, 1000);
 }
-
 
 let paintTool = 'pen';
 function setPaintTool(tool){
@@ -2944,7 +2824,6 @@ function paintSave(){
   link.click();
 }
 
-
 function setupWeather(){
   const body = document.getElementById('weather-body');
   const codeMap = {0:'☀️ Clear',1:'🌤️ Mostly clear',2:'⛅ Partly cloudy',3:'☁️ Overcast',45:'🌫️ Fog',51:'🌦️ Drizzle',61:'🌧️ Rain',71:'🌨️ Snow',80:'🌦️ Showers',95:'⛈️ Storms'};
@@ -2973,10 +2852,6 @@ function setupWeather(){
     body.textContent = 'Geolocation not available.';
   }
 }
-
-
-
-
 
 const BROWSER_HOME = 'https://www.google.com/webhp?igu=1';
 let browserTabs = [{id:1, url:BROWSER_HOME, history:[BROWSER_HOME], index:0}];
@@ -3129,8 +3004,6 @@ function browserReload(){
   loadBrowserFrame(tab.url);
 }
 
-
-
 const videos = [
   { id:"cObwY45Qh6s", title:"Top 10 Plays — Mar 16" },
   { id:"DK1SVAzQ-8Y", title:"Top 10 Plays — Jun 10" },
@@ -3182,8 +3055,6 @@ function playVideo(i){
   });
   frame.src = `https://www.youtube.com/embed/${v.id}?${params.toString()}`;
 }
-
-
 
 const players = [
   { initials:"MJ", name:"Michael Jordan", team:"Bulls", color:"#ce1141", fact:"6x NBA champion, widely considered the GOAT.", nbaUrl:"https://www.nba.com/player/893/michael-jordan", headshot:"https://cdn.nba.com/headshots/nba/latest/1040x760/893.png" },
@@ -3341,7 +3212,6 @@ function makeResizable(win){
   bind('[data-resize-s]', 's');
 }
 
-
 const iconsEl = document.getElementById('icons');
 const dockEl = document.getElementById('dock');
 const dockAppOrder = ['playbook','scoreboard','shotclock','stats','schedule','calculator','terminal','watch','gallery','paint','weather','browser','hoopsgame','locker','settings'];
@@ -3465,7 +3335,6 @@ function makeIconDraggable(icon, id){
   });
 }
 
-
 function showToast(text){
   const t = document.createElement('div');
   t.className = 'toast';
@@ -3473,7 +3342,6 @@ function showToast(text){
   document.getElementById('toasts').appendChild(t);
   setTimeout(() => t.remove(), 3000);
 }
-
 
 let notifications = [];
 function pushNotification(text){
@@ -3506,50 +3374,6 @@ document.addEventListener('click', (e) => {
     panel.classList.remove('open');
   }
 });
-
-
-const confettiCanvas = document.getElementById('confetti-canvas');
-const confettiCtx = confettiCanvas.getContext('2d');
-function resizeConfettiCanvas(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
-resizeConfettiCanvas();
-window.addEventListener('resize', resizeConfettiCanvas);
-let confettiParticles = [];
-let confettiRAF = null;
-function fireConfetti(originX, originY){
-  const colors = [settings.accent, '#f2d8a7', '#6ee7b7', '#e6484f'];
-  const x = originX !== undefined ? originX : confettiCanvas.width / 2;
-  const y = originY !== undefined ? originY : confettiCanvas.height / 3;
-  for(let i = 0; i < 40; i++){
-    confettiParticles.push({
-      x, y,
-      vx: (Math.random() - 0.5) * 8,
-      vy: Math.random() * -6 - 2,
-      size: Math.random() * 5 + 3,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * 360,
-      vr: (Math.random() - 0.5) * 12,
-      life: 60 + Math.random() * 30
-    });
-  }
-  if(!confettiRAF) confettiLoop();
-}
-function confettiLoop(){
-  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-  confettiParticles.forEach(p => {
-    p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rot += p.vr; p.life--;
-    confettiCtx.save();
-    confettiCtx.translate(p.x, p.y);
-    confettiCtx.rotate(p.rot * Math.PI / 180);
-    confettiCtx.fillStyle = p.color;
-    confettiCtx.globalAlpha = Math.max(0, Math.min(1, p.life / 30));
-    confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-    confettiCtx.restore();
-  });
-  confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < confettiCanvas.height + 40);
-  if(confettiParticles.length){ confettiRAF = requestAnimationFrame(confettiLoop); }
-  else { confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiRAF = null; }
-}
-
 
 const spotlight = document.getElementById('spotlight');
 const resultsEl = document.getElementById('spotlight-results');
@@ -3588,7 +3412,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-
 function updateClock(){
   const now = new Date();
   const t = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -3602,7 +3425,6 @@ function updateClock(){
 }
 updateClock();
 setInterval(updateClock, 1000 * 15);
-
 
 let gameClockSeconds = 12 * 60;
 let gameClockInterval = null;
@@ -3647,7 +3469,6 @@ function nextPeriod(){
 }
 renderGameClock();
 
-
 const batteryEl = document.getElementById('battery-display');
 function renderBattery(battery){
   const pct = Math.round(battery.level * 100);
@@ -3664,7 +3485,6 @@ if('getBattery' in navigator){
   
   batteryEl.textContent = '🔋';
 }
-
 
 let sharedAudioCtx = null;
 function getAudioCtx(){
@@ -3709,18 +3529,15 @@ function playBuzzer(){
   } catch(e){}
 }
 
-
 let scoreA = 0, scoreB = 0;
 function syncWidgetScore(){ document.getElementById('widget-score-a').textContent = scoreA; document.getElementById('widget-score-b').textContent = scoreB; }
 function bumpScore(team, delta){
   if(team === 'a'){ scoreA = Math.max(0, scoreA + delta); document.getElementById('score-a').textContent = scoreA; }
   else { scoreB = Math.max(0, scoreB + delta); document.getElementById('score-b').textContent = scoreB; }
   syncWidgetScore();
-  if(delta > 0){ playSound('score'); fireConfetti(); }
+  if(delta > 0){ playSound('score'); }
 }
 function resetScore(){ scoreA = 0; scoreB = 0; document.getElementById('score-a').textContent = 0; document.getElementById('score-b').textContent = 0; syncWidgetScore(); }
-
-
 
 let clockMode = 'shot';
 let shotClockSeconds = 24;
@@ -3773,7 +3590,6 @@ function renderClockModeBody(){
   }
 }
 
-
 function setShotClock(n){
   if(shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; }
   shotClockSeconds = n;
@@ -3793,7 +3609,6 @@ function toggleShotClock(){
     }, 1000);
   }
 }
-
 
 function applyTimerInput(){
   const min = parseInt(document.getElementById('timer-min').value) || 0;
@@ -3820,7 +3635,6 @@ function resetTimer(){
   timerRunning = false; timerSeconds = 0;
   renderClockModeBody();
 }
-
 
 function formatStopwatch(ms){
   const totalSec = Math.floor(ms / 1000);
@@ -3851,14 +3665,13 @@ function setupClockApp(){
   renderClockModeBody();
 }
 
-
 function setupCalculator(){
   const grid = document.getElementById('calc-grid');
   const screen = document.getElementById('calc-screen');
   const isOperator = (c) => ['/','*','-','+'].includes(c);
   const keys = ['7','8','9','/','4','5','6','*','1','2','3','-','C','0','=','+'];
   let expr = '';
-  let justEvaluated = false; // true right after "=" produced a result
+  let justEvaluated = false;
 
   keys.forEach(k => {
     const btn = document.createElement('button');
@@ -3876,16 +3689,13 @@ function setupCalculator(){
         justEvaluated = true;
       } else if(isOperator(k)){
         if(isOperator(expr.slice(-1))){
-          
           expr = expr.slice(0, -1) + k;
         } else if(expr === '' && k !== '-'){
-          
         } else {
           expr += k;
         }
         justEvaluated = false;
       } else {
-        
         if(justEvaluated || expr === 'Error'){ expr = ''; }
         expr += k;
         justEvaluated = false;
@@ -3895,7 +3705,6 @@ function setupCalculator(){
     grid.appendChild(btn);
   });
 }
-
 
 let stats = { Points:0, Rebounds:0, Assists:0, Steals:0 };
 function setupStats(){
@@ -3921,7 +3730,6 @@ function resetStats(){
   setupStats();
 }
 
-
 const mascot = document.getElementById('mascot');
 let mascotRoamTimer = null;
 let mouseTargetX = 220, mouseTargetY = 260;
@@ -3945,8 +3753,6 @@ function restartMascotLoop(){
   mascot.style.transition = settings.mascotFollow ? 'none' : `left ${speed.transition}s ease-in-out, top ${speed.transition}s ease-in-out`;
   mascotRoamTimer = setInterval(roamMascot, speed.interval);
 }
-
-
 
 document.addEventListener('mousemove', (e) => {
   mouseTargetX = e.clientX - 15;
