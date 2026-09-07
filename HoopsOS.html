@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HoopsOS</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Orbitron:wght@300;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 :root {
-  --bg-deep:#0c0e14;
-  --bg-panel:#171a24;
-  --bg-panel-2:#1f2430;
-  --bg-bar:rgba(15,17,25,0.85);
-  --accent:#ff7a29;
-  --accent-cream:#f2d8a7;
-  --accent-red:#e6484f;
-  --court-line:rgba(242,216,167,0.14);
-  --text-hi:#f3f0e8;
-  --text-lo:#8a8d9c;
-  --border:#2a2e3d;
+  --bg-deep:#1b120a;
+  --bg-panel:#2c1e13;
+  --bg-panel-2:#3c2a19;
+  --bg-bar:rgba(21,14,8,0.9);
+  --accent:#c4672e;
+  --accent-cream:#e8c468;
+  --accent-red:#c94838;
+  --court-line:rgba(232,196,104,0.16);
+  --text-hi:#f1e6cf;
+  --text-lo:#a3876a;
+  --border:#4a3520;
 }
 * {
   box-sizing:border-box;
@@ -37,7 +37,7 @@ html,body {
 #boot {
   position:fixed;
   inset:0;
-  background:radial-gradient(circle at 50% 35%,rgba(255,122,41,.10),transparent 38%),var(--bg-deep);
+  background:radial-gradient(circle at 50% 35%,rgba(196,103,46,.10),transparent 38%),var(--bg-deep);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -49,7 +49,7 @@ html,body {
   background:rgba(18,20,29,.94);
   border:1px solid var(--border);
   border-radius:18px;
-  box-shadow:0 30px 90px rgba(0,0,0,.68),0 0 60px rgba(255,122,41,.08);
+  box-shadow:0 30px 90px rgba(0,0,0,.68),0 0 60px rgba(196,103,46,.08);
   overflow:hidden;
   backdrop-filter:blur(16px);
 }
@@ -68,7 +68,7 @@ html,body {
   place-items:center;
   font-size:31px;
   background:var(--accent);
-  box-shadow:0 10px 30px rgba(255,122,41,.28);
+  box-shadow:0 10px 30px rgba(196,103,46,.28);
 }
 .boot-brand h1 {
   margin:0;
@@ -193,8 +193,8 @@ html,body {
   justify-content:center;
   gap:10px;
   background:
-      radial-gradient(circle at 20% 20%, rgba(255,122,41,0.14), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(45,212,191,0.10), transparent 45%),
+      radial-gradient(circle at 20% 20%, rgba(196,103,46,0.14), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(232,196,104,0.10), transparent 45%),
       repeating-linear-gradient(90deg, #14161f 0 3px, #101219 3px 42px),
       var(--bg-deep);
   opacity:1;
@@ -450,7 +450,7 @@ html,body {
 .widget-clock-controls button.primary,
 .shotclock-btns button.primary {
   background:var(--accent);
-  color:#0c0e14;
+  color:#1b120a;
   font-weight:700;
   border:none;
 }
@@ -561,19 +561,20 @@ html,body {
   user-select:none;
 }
 #rainmeter-clock .rm-time {
-  font-family:'Orbitron', sans-serif;
-  font-weight:300;
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:500;
+  font-variant-numeric: tabular-nums;
   font-size:96px;
   letter-spacing:6px;
-  color:rgba(243,240,232,0.85);
-  text-shadow:0 0 30px rgba(255,122,41,0.25), 0 2px 12px rgba(0,0,0,0.5);
+  color:rgba(241,230,207,0.85);
+  text-shadow:0 0 30px rgba(196,103,46,0.3), 0 2px 12px rgba(0,0,0,0.5);
 }
 #rainmeter-clock .rm-date {
-  font-family:'Orbitron', sans-serif;
-  font-weight:300;
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:500;
   font-size:13px;
   letter-spacing:5px;
-  color:rgba(243,240,232,0.45);
+  color:rgba(241,230,207,0.45);
   text-transform:uppercase;
   margin-top:6px;
 }
@@ -620,8 +621,8 @@ html,body {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .window.focused {
-  border-color:rgba(255,122,41,0.5);
-  box-shadow:0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,122,41,0.15), 0 0 24px rgba(255,122,41,0.12);
+  border-color:rgba(196,103,46,0.5);
+  box-shadow:0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,103,46,0.15), 0 0 24px rgba(196,103,46,0.12);
 }
 .window.maximized {
   left:0 !important;
@@ -695,7 +696,7 @@ html,body {
   align-items:center;
   justify-content:center;
   font-size:9px;
-  color:#0c0e14;
+  color:#1b120a;
   font-weight:700;
 }
 .win-btn.min {
@@ -849,7 +850,7 @@ html,body {
   color:var(--text-lo);
 }
 .clock-tab.active {
-  background:rgba(255,122,41,0.15);
+  background:rgba(196,103,46,0.15);
   border-color:var(--accent);
   color:var(--text-hi);
 }
@@ -908,7 +909,7 @@ html,body {
 }
 .calc-btn.eq {
   background:var(--accent);
-  color:#0c0e14;
+  color:#1b120a;
   font-weight:700;
 }
 .stat-row {
@@ -999,7 +1000,7 @@ html,body {
   margin:12px auto 0;
   background:var(--accent);
   border:none;
-  color:#0c0e14;
+  color:#1b120a;
   font-weight:700;
   padding:6px 16px;
   border-radius:8px;
@@ -1081,7 +1082,7 @@ html,body {
 }
 .watch-item.active {
   border-color:var(--accent);
-  background:rgba(255,122,41,0.1);
+  background:rgba(196,103,46,0.1);
 }
 .watch-player {
   flex:1;
@@ -1107,14 +1108,14 @@ html,body {
   display:inline-block;
 }
 .bg-layer.bg-court {
-  background-image: repeating-linear-gradient(90deg, #14161f 0px, #14161f 3px, #101219 3px, #101219 42px);
+  background-image: repeating-linear-gradient(90deg, #241a10 0px, #241a10 3px, #1e1409 3px, #1e1409 42px);
   background-color: var(--bg-deep);
 }
 .bg-layer.bg-plain {
   background: var(--bg-deep);
 }
 .bg-layer.bg-nebula {
-  background: radial-gradient(circle at 20% 20%, rgba(255,122,41,0.18), transparent 45%), radial-gradient(circle at 80% 75%, rgba(45,212,191,0.14), transparent 45%), var(--bg-deep);
+  background: radial-gradient(circle at 20% 20%, rgba(196,103,46,0.18), transparent 45%), radial-gradient(circle at 80% 75%, rgba(232,196,104,0.14), transparent 45%), var(--bg-deep);
 }
 .bg-layer.bg-grid {
   background: linear-gradient(var(--court-line) 1px, transparent 1px) 0 0/32px 32px, linear-gradient(90deg, var(--court-line) 1px, transparent 1px) 0 0/32px 32px, var(--bg-deep);
@@ -1126,7 +1127,7 @@ html,body {
   background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.35) 41%, transparent 43%) 0 0/54px 54px, radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px) 0 0/6px 6px, var(--bg-deep);
 }
 .bg-layer.bg-arena {
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.10), transparent 60%), radial-gradient(ellipse 30% 50% at 15% 100%, rgba(255,122,41,0.12), transparent 70%), radial-gradient(ellipse 30% 50% at 85% 100%, rgba(45,212,191,0.10), transparent 70%), var(--bg-deep);
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,0.10), transparent 60%), radial-gradient(ellipse 30% 50% at 15% 100%, rgba(196,103,46,0.12), transparent 70%), radial-gradient(ellipse 30% 50% at 85% 100%, rgba(232,196,104,0.10), transparent 70%), var(--bg-deep);
 }
 .bg-layer.bg-net {
   background-image: repeating-linear-gradient(45deg, var(--court-line) 0px, var(--court-line) 1px, transparent 1px, transparent 18px), repeating-linear-gradient(-45deg, var(--court-line) 0px, var(--court-line) 1px, transparent 1px, transparent 18px);
@@ -1136,13 +1137,13 @@ html,body {
   background: linear-gradient(180deg, #17263d 0%, #3d3352 30%, #b8703f 65%, #f2c14e 100%);
 }
 .bg-layer.bg-midnight {
-  background: radial-gradient(ellipse at 50% 130%, #2a1d45, #0c0e14 70%);
+  background: radial-gradient(ellipse at 50% 130%, #2a1d45, #1b120a 70%);
 }
 .bg-layer.bg-mono {
-  background: linear-gradient(#2a2a2a, #0c0e14 80%);
+  background: linear-gradient(#2a2a2a, #1b120a 80%);
 }
 .bg-layer.bg-photo {
-  background: #0c0e14 url('bg-photo.jpg') center/cover no-repeat;
+  background: #1b120a url('bg-photo.jpg') center/cover no-repeat;
 }
 .bg-layer.bg-photo::before {
   content:'';
@@ -1152,7 +1153,7 @@ html,body {
   pointer-events:none;
 }
 .bg-layer.bg-unsplash-hoop {
-  background:#0c0e14 url("https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
+  background:#1b120a url("https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 [class*="bg-unsplash-"]::before {
   content:"";
@@ -1164,43 +1165,43 @@ html,body {
   background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-court {
-  background:#0c0e14 url("https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
+  background:#1b120a url("https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-court::before {
   background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-blue {
-  background:#0c0e14 url("https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
+  background:#1b120a url("https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-blue::before {
   background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-aerial {
-  background:#0c0e14 url("https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
+  background:#1b120a url("https://images.unsplash.com/photo-1742661607578-37c3e15d7c9d?auto=format&fit=crop&w=2400&q=85") center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-aerial::before {
   background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-ball-ring {
-  background:#0c0e14 url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
+  background:#1b120a url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-ball-ring::before {
   background:rgba(0,0,0,0.32);
 }
 .bg-layer.bg-unsplash-silhouette {
-  background:#0c0e14 url('https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
+  background:#1b120a url('https://images.unsplash.com/photo-1474224017046-182ece80b263?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-silhouette::before {
   background:rgba(0,0,0,0.28);
 }
 .bg-layer.bg-unsplash-grayscale {
-  background:#0c0e14 url('https://unsplash.com/photos/UFIZodJgScQ/download?force=true') center/cover no-repeat;
+  background:#1b120a url('https://unsplash.com/photos/UFIZodJgScQ/download?force=true') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-grayscale::before {
   background:rgba(0,0,0,0.30);
 }
 .bg-layer.bg-unsplash-illustration {
-  background:#0c0e14 url('https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
+  background:#1b120a url('https://images.unsplash.com/photo-1525973132219-a04334a76080?auto=format&fit=crop&w=2400&q=85') center/cover no-repeat;
 }
 .bg-layer.bg-unsplash-illustration::before {
   background:rgba(0,0,0,0.24);
@@ -1251,7 +1252,7 @@ html,body {
 }
 .speed-opt.active {
   border-color:var(--accent);
-  background:rgba(255,122,41,0.12);
+  background:rgba(196,103,46,0.12);
 }
 #context-menu {
   position:fixed;
@@ -1369,14 +1370,14 @@ html,body {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .toolbar-btn.active {
-  background:rgba(255,122,41,0.16);
+  background:rgba(196,103,46,0.16);
   border-color:var(--accent);
   color:var(--accent);
 }
 .toolbar-btn.primary {
   background:var(--accent);
   border-color:var(--accent);
-  color:#0c0e14;
+  color:#1b120a;
   font-weight:700;
 }
 .toolbar-btn.primary:hover {
@@ -1727,7 +1728,7 @@ html,body {
 }
 .toggle.on .knob {
   left:20px;
-  background:#0c0e14;
+  background:#1b120a;
 }
 .win-controls,
 .mascot-icon-options,
@@ -2019,18 +2020,18 @@ const accentOptions = [
   { name:'Home Gold', value:'#fbbf24' },
 ];
 const backgroundOptions = [
-  { name:'Hardwood Court', value:'court', preview:'repeating-linear-gradient(90deg, #14161f 0 3px, #2a2e3d 3px 8px)' },
-  { name:'Plain', value:'plain', preview:'#0c0e14' },
-  { name:'Nebula', value:'nebula', preview:'radial-gradient(circle at 30% 30%, #ff7a29, #0c0e14 60%)' },
-  { name:'Grid', value:'grid', preview:'linear-gradient(#2a2e3d 1px, transparent 1px) 0 0/8px 8px, linear-gradient(90deg, #2a2e3d 1px, transparent 1px) 0 0/8px 8px, #0c0e14' },
-  { name:'Dots', value:'dots', preview:'radial-gradient(#2a2e3d 1.5px, transparent 1.5px) 0 0/8px 8px, #0c0e14' },
-  { name:'Leather', value:'leather', preview:'radial-gradient(circle at 50% 50%, transparent 30%, #2a2e3d 32%, transparent 36%) 0 0/16px 16px, #0c0e14' },
-  { name:'Arena Lights', value:'arena', preview:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.25), transparent 60%), #0c0e14' },
-  { name:'Net Weave', value:'net', preview:'repeating-linear-gradient(45deg, #2a2e3d 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, #2a2e3d 0 1px, transparent 1px 6px), #0c0e14' },
+  { name:'Hardwood Court', value:'court', preview:'repeating-linear-gradient(90deg, #241a10 0 3px, #4a3520 3px 8px)' },
+  { name:'Plain', value:'plain', preview:'#1b120a' },
+  { name:'Nebula', value:'nebula', preview:'radial-gradient(circle at 30% 30%, #c4672e, #1b120a 60%)' },
+  { name:'Grid', value:'grid', preview:'linear-gradient(#4a3520 1px, transparent 1px) 0 0/8px 8px, linear-gradient(90deg, #4a3520 1px, transparent 1px) 0 0/8px 8px, #1b120a' },
+  { name:'Dots', value:'dots', preview:'radial-gradient(#4a3520 1.5px, transparent 1.5px) 0 0/8px 8px, #1b120a' },
+  { name:'Leather', value:'leather', preview:'radial-gradient(circle at 50% 50%, transparent 30%, #4a3520 32%, transparent 36%) 0 0/16px 16px, #1b120a' },
+  { name:'Arena Lights', value:'arena', preview:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.25), transparent 60%), #1b120a' },
+  { name:'Net Weave', value:'net', preview:'repeating-linear-gradient(45deg, #4a3520 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, #4a3520 0 1px, transparent 1px 6px), #1b120a' },
   { name:'Sunset Palms', value:'sunset', preview:'linear-gradient(180deg, #1a2a3d 0%, #d98a3d 60%, #f2c14e 100%)' },
-  { name:'Midnight Fade', value:'midnight', preview:'radial-gradient(ellipse at 50% 120%, #2a1d45, #0c0e14 70%)' },
-  { name:'Mono Court', value:'mono', preview:'linear-gradient(#3a3a3a, #0c0e14)' },
-  { name:'My Photo', value:'photo', preview:'#0c0e14 url(bg-photo.jpg) center/cover no-repeat' },
+  { name:'Midnight Fade', value:'midnight', preview:'radial-gradient(ellipse at 50% 120%, #2a1d45, #1b120a 70%)' },
+  { name:'Mono Court', value:'mono', preview:'linear-gradient(#3a3a3a, #1b120a)' },
+  { name:'My Photo', value:'photo', preview:'#1b120a url(bg-photo.jpg) center/cover no-repeat' },
   { name:'Basketball — Outdoor Court', value:'unsplash-hoop', preview:'url(https://images.unsplash.com/photo-1624003656704-efbfdde3dedc?auto=format&fit=crop&w=1000&q=80)' },
   { name:'Basketball — City Court', value:'unsplash-court', preview:'url(https://images.unsplash.com/photo-1677414454420-3752377271d1?auto=format&fit=crop&w=1000&q=80)' },
   { name:'Basketball — Indoor Hoop', value:'unsplash-blue', preview:'url(https://images.unsplash.com/photo-1710422403372-54e626461568?auto=format&fit=crop&w=1000&q=80)' },
@@ -2331,7 +2332,7 @@ const appDefs = {
       <div style="text-align:center;">
         <div style="font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--accent); line-height:1;">44</div>
         <div style="font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px;">MADHAV</div>
-        <div style="display:inline-block; margin-top:6px; padding:3px 10px; border-radius:20px; background:rgba(255,122,41,0.15); border:1px solid var(--accent); color:var(--accent); font-size:10px;">DEFENDER</div>
+        <div style="display:inline-block; margin-top:6px; padding:3px 10px; border-radius:20px; background:rgba(196,103,46,0.15); border:1px solid var(--accent); color:var(--accent); font-size:10px;">DEFENDER</div>
       </div>
       <p style="margin-top:12px;">Basketball, coding, and gaming — that's pretty much it. This whole OS is something I built myself.</p>
     ` },
@@ -3785,4 +3786,4 @@ restartMascotLoop();
 </script>
 
 </body>
-</html>
+  </html>
