@@ -319,7 +319,7 @@ html,body {
   width:300px;
   height:calc(100dvh - 34px);
   z-index:9100;
-  background:rgba(23,26,36,0.92);
+  background:rgba(44,30,19,0.92);
   backdrop-filter:blur(18px);
   border-left:1px solid var(--border);
   transition: right 0.25s ease;
@@ -416,13 +416,19 @@ html,body {
   width:170px;
 }
 .widget {
-  background:linear-gradient(165deg, rgba(31,36,48,0.75), rgba(23,26,36,0.6));
+  background:linear-gradient(165deg, rgba(60,42,25,0.75), rgba(44,30,19,0.6));
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:14px;
+  border-left:2px solid var(--border);
+  border-radius:4px;
   padding:14px;
-  box-shadow: 0 14px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+}
+#widget-clock {
+  border-left-color:var(--accent-red);
+}
+#widget-score {
+  border-left-color:var(--accent);
 }
 .widget .w-title {
   font-size:10px;
@@ -478,12 +484,12 @@ html,body {
   align-items:center;
   gap:7px;
   padding:10px 4px 8px;
-  border-radius:12px;
+  border-radius:8px;
   cursor:grab;
   position:absolute;
   z-index:1;
   transition: transform 0.12s ease, background 0.15s ease;
-  background:rgba(10,12,20,0.32);
+  background:rgba(27,18,10,0.4);
   backdrop-filter:blur(7px);
   -webkit-backdrop-filter:blur(7px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
@@ -493,30 +499,29 @@ html,body {
   transform:scale(0.94);
 }
 .icon:hover {
-  background:rgba(10,12,20,0.5);
+  background:rgba(27,18,10,0.6);
 }
 .icon .glyph {
   width:50px;
   height:50px;
-  border-radius:14px;
+  border-radius:7px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:22px;
+  color:var(--text-hi);
   pointer-events:none;
   position:relative;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -6px 10px rgba(0,0,0,0.15);
-  background-blend-mode: overlay;
+  background:var(--bg-panel-2);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  border-bottom:3px solid var(--tag-color, var(--accent));
 }
-.icon .glyph::after {
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:14px;
-  background:linear-gradient(160deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 55%);
-  pointer-events:none;
+.icon .glyph svg {
+  width:24px;
+  height:24px;
 }
 .icon .label {
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   font-size:11px;
   color:var(--text-hi);
   text-align:center;
@@ -530,7 +535,11 @@ html,body {
   width:34px;
   height:34px;
   font-size:15px;
-  border-radius:10px;
+  border-radius:5px;
+}
+#desktop.icons-small .icon .glyph svg {
+  width:16px;
+  height:16px;
 }
 #desktop.icons-small .icon .label {
   font-size:9.5px;
@@ -545,7 +554,11 @@ html,body {
   width:68px;
   height:68px;
   font-size:30px;
-  border-radius:18px;
+  border-radius:9px;
+}
+#desktop.icons-large .icon .glyph svg {
+  width:32px;
+  height:32px;
 }
 #desktop.icons-large .icon .label {
   font-size:12.5px;
@@ -609,12 +622,13 @@ html,body {
   z-index:1000;
   min-width:280px;
   min-height:180px;
-  background:rgba(23,26,36,0.78);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
+  background:rgba(44,30,19,0.86);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
   border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.55);
+  border-top:2px solid var(--accent);
+  border-radius:3px 3px 10px 10px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -659,7 +673,7 @@ html,body {
 }
 .titlebar {
   height:38px;
-  background:rgba(31,36,48,0.6);
+  background:repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 46px), rgba(60,42,25,0.75);
   backdrop-filter:blur(10px);
   display:flex;
   align-items:center;
@@ -1760,34 +1774,34 @@ html,body {
   display:flex;
   align-items:flex-end;
   gap:10px;
-  background:rgba(20,23,35,0.55);
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:20px;
+  background:rgba(44,30,19,0.7);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  border-top:2px solid var(--accent-cream);
+  border-radius:6px;
   padding:9px 14px;
-  box-shadow: 0 20px 45px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.5);
 }
 .dock-icon {
   position:relative;
   width:44px;
   height:44px;
-  border-radius:13px;
+  border-radius:7px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:19px;
+  color:var(--text-hi);
   cursor:pointer;
+  background:var(--bg-panel-2);
+  border-bottom:3px solid var(--tag-color, var(--accent));
   transition:transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s ease;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -6px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
-.dock-icon::after {
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:13px;
-  background:linear-gradient(160deg, rgba(255,255,255,0.30), rgba(255,255,255,0) 55%);
-  pointer-events:none;
+.dock-icon svg {
+  width:21px;
+  height:21px;
 }
 .dock-icon:hover {
   transform:translateY(-9px) scale(1.14);
@@ -1931,7 +1945,7 @@ html,body {
     <div class="rm-date" id="rm-date">-</div>
   </div>
   <div id="spotlight-wrap">
-    <input id="spotlight" placeholder="Search apps... (Enter to launch)" autocomplete="off">
+    <input id="spotlight" placeholder="Search apps..." autocomplete="off">
     <div id="spotlight-results"></div>
   </div>
   <div id="widgets">
@@ -1945,7 +1959,7 @@ html,body {
         <button onclick="nextPeriod()">Next Qtr</button>
       </div>
     </div>
-    <div class="widget">
+    <div class="widget" id="widget-score">
       <div class="w-title">LIVE SCORE</div>
       <div class="widget-score-row">
         <span id="widget-score-a">0</span>
@@ -2296,10 +2310,14 @@ let zTop = 1000;
 const openWindows = {};
 
 const appDefs = {
-  playbook: { title:"Playbook", dot:"var(--accent-cream)", icon:"📋", width:360, height:260,
+  playbook: { title:"Playbook", dot:"var(--accent-cream)", icon:"📋",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3" rx="1"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="13" y2="18"/></svg>',
+    width:360, height:260,
     render: () => `<textarea id="notes-textarea" placeholder="Draw up a play in words..." oninput="savePlaybookNotes(this.value)"></textarea>` },
 
-  scoreboard: { title:"Scoreboard", dot:"var(--accent)", icon:"🏀", width:380, height:300,
+  scoreboard: { title:"Scoreboard", dot:"var(--accent)", icon:"🏀",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="10" x2="9" y2="10"/><line x1="6" y1="14" x2="9" y2="14"/><line x1="15" y1="10" x2="18" y2="10"/><line x1="15" y1="14" x2="18" y2="14"/></svg>',
+    width:380, height:300,
     render: () => `
       <div class="score-wrap">
         <div class="score-team">
@@ -2317,7 +2335,9 @@ const appDefs = {
       <button class="score-reset" onclick="resetScore()">Reset</button>
     ` },
 
-  shotclock: { title:"Clock", dot:"var(--accent-red)", icon:"⏱", width:340, height:320,
+  shotclock: { title:"Clock", dot:"var(--accent-red)", icon:"⏱",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="12" x2="12" y2="7"/><line x1="12" y1="12" x2="16" y2="14"/></svg>',
+    width:340, height:320,
     render: () => `
       <div class="clock-tabs" id="clock-tabs">
         <div class="clock-tab active" data-mode="shot" onclick="switchClockMode('shot')">Shot Clock</div>
@@ -2327,7 +2347,9 @@ const appDefs = {
       <div id="clock-mode-body"></div>
     ` },
 
-  locker: { title:"Locker Room", dot:"#4a4f63", icon:"🧢", width:340, height:320,
+  locker: { title:"Locker Room", dot:"var(--border)", icon:"🧢",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4L3 7l2 3 3-1.5V20h8V8.5L19 10l2-3-5-3-2 2h-4z"/></svg>',
+    width:340, height:320,
     render: () => `
       <div style="text-align:center;">
         <div style="font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--accent); line-height:1;">44</div>
@@ -2337,16 +2359,22 @@ const appDefs = {
       <p style="margin-top:12px;">Basketball, coding, and gaming — that's pretty much it. This whole OS is something I built myself.</p>
     ` },
 
-  calculator: { title:"Calculator", dot:"#4a4f63", icon:"🧮", width:300, height:400,
+  calculator: { title:"Calculator", dot:"var(--border)", icon:"🧮",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><circle cx="8" cy="12" r="0.8"/><circle cx="12" cy="12" r="0.8"/><circle cx="16" cy="12" r="0.8"/><circle cx="8" cy="16" r="0.8"/><circle cx="12" cy="16" r="0.8"/><circle cx="16" cy="16" r="0.8"/></svg>',
+    width:300, height:400,
     render: () => `<div class="calc-screen" id="calc-screen">0</div><div class="calc-grid" id="calc-grid"></div>` },
 
-  stats: { title:"Stat Tracker", dot:"var(--accent-cream)", icon:"📊", width:340, height:320,
+  stats: { title:"Stat Tracker", dot:"var(--border)", icon:"📊",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="7"/><line x1="19" y1="20" x2="19" y2="15"/><line x1="3" y1="20" x2="21" y2="20"/></svg>',
+    width:340, height:320,
     render: () => `
       <div id="stat-rows"></div>
       <button class="stat-reset" onclick="resetStats()">Reset stats</button>
     ` },
 
-  schedule: { title:"Schedule", dot:"#2dd4bf", icon:"🗓️", width:360, height:320,
+  schedule: { title:"Schedule", dot:"var(--border)", icon:"🗓️",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>',
+    width:360, height:320,
     render: () => `
       <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
         <button class="calc-btn" id="sched-mode-btn" onclick="toggleScheduleEdit()">Edit</button>
@@ -2355,7 +2383,9 @@ const appDefs = {
       <button class="sched-add" id="sched-add-btn" style="display:none;" onclick="addScheduleGame()">+ Add game</button>
     ` },
 
-  hoopsgame: { title:"Hoops Shootout", dot:"var(--accent)", icon:"🎯", width:360, height:420,
+  hoopsgame: { title:"Hoops Shootout", dot:"var(--accent)", icon:"🎯",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>',
+    width:360, height:420,
     render: () => `
       <div style="margin:-14px; padding:10px; height:calc(100% + 28px); display:flex; flex-direction:column;">
         <div style="display:flex; justify-content:space-between; font-family:'Bebas Neue',sans-serif; font-size:16px; margin-bottom:6px;">
@@ -2367,7 +2397,9 @@ const appDefs = {
       </div>
     ` },
 
-  paint: { title:"Paint", dot:"#f472b6", icon:"🎨", width:420, height:440,
+  paint: { title:"Paint", dot:"var(--border)", icon:"🎨",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-9.5 9.5-5 1 1-5z"/><line x1="14" y1="6" x2="18" y2="10"/></svg>',
+    width:420, height:440,
     render: () => `
       <div style="margin:-14px; height:calc(100% + 28px); display:flex; flex-direction:column;">
         <div class="toolbar-row">
@@ -2382,10 +2414,14 @@ const appDefs = {
       </div>
     ` },
 
-  weather: { title:"Weather", dot:"#3b82f6", icon:"⛅", width:300, height:280,
+  weather: { title:"Weather", dot:"var(--border)", icon:"⛅",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="19.1" y1="4.9" x2="17" y2="7"/><line x1="7" y1="17" x2="4.9" y2="19.1"/></svg>',
+    width:300, height:280,
     render: () => `<div id="weather-body" style="text-align:center;">Loading weather…</div>` },
 
-  browser: { title:"Browser", dot:"#a78bfa", icon:"🌐", width:620, height:500,
+  browser: { title:"Browser", dot:"var(--border)", icon:"🌐",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3c2.5 2.7 3.8 6 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-6-3.8-9s1.3-6.3 3.8-9z"/></svg>',
+    width:620, height:500,
     render: () => `
       <div class="browser-shell">
         <div class="browser-tabs" id="browser-tabs"></div>
@@ -2418,7 +2454,9 @@ const appDefs = {
       </div>
     ` },
 
-  terminal: { title:"Terminal", dot:"#6ee7b7", icon:"🖥️", width:420, height:340,
+  terminal: { title:"Terminal", dot:"var(--border)", icon:"🖥️",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="12" y1="15" x2="17" y2="15"/></svg>',
+    width:420, height:340,
     render: () => `
       <div class="term-body" style="margin:-14px; padding:14px;">
         <div class="term-output" id="term-output">HoopsOS Terminal v1.0
@@ -2431,7 +2469,9 @@ Type 'help' for a list of commands.
       </div>
     ` },
 
-  watch: { title:"Watch", dot:"#e6484f", icon:"📺", width:480, height:400,
+  watch: { title:"Watch", dot:"var(--border)", icon:"📺",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><polygon points="10 9 15 12 10 15" fill="currentColor" stroke="none"/></svg>',
+    width:480, height:400,
     render: () => `
       <div class="watch-layout">
         <div class="watch-list" id="watch-list"></div>
@@ -2443,10 +2483,14 @@ Type 'help' for a list of commands.
       </div>
     ` },
 
-  gallery: { title:"Hall of Fame", dot:"#e6484f", icon:"🏆", width:380, height:400,
+  gallery: { title:"Hall of Fame", dot:"var(--accent-cream)", icon:"🏆",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a2 2 0 0 0 2 4"/><path d="M16 5h3a2 2 0 0 1-2 4"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
+    width:380, height:400,
     render: () => `<div class="gallery-grid" id="gallery-grid"></div><div class="gallery-detail" id="gallery-detail">Tap a legend for a quick fact</div>` },
 
-  settings: { title:"Settings", dot:"#8a8d9c", icon:"⚙️", width:540, height:440,
+  settings: { title:"Settings", dot:"var(--border)", icon:"⚙️",
+    svgIcon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.3"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(0 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(45 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(90 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(135 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(180 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(225 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(270 12 12)"/><line x1="12" y1="5.3" x2="12" y2="2.3" transform="rotate(315 12 12)"/></svg>',
+    width:540, height:440,
     render: () => `
       <div class="settings-layout">
         <div class="settings-nav">
@@ -2867,8 +2911,8 @@ function normalizeBrowserUrl(input){
   if(!input) return BROWSER_HOME;
   if(/^https?:\/\//i.test(input)) return input;
   if(/^localhost(?::\d+)?(?:\/.*)?$/i.test(input)) return 'http://'+input;
-  if(/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(input)) return 'https://'+input;
-  return 'https://www.google.com/search?igu=1&q='+encodeURIComponent(input);
+  if(/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(input)) return 'https://'+input; // looks like a domain
+  return 'https://www.google.com/search?igu=1&q='+encodeURIComponent(input); // otherwise just search for it
 }
 
 function updateBrowserUI(url, loading=false){
@@ -3236,7 +3280,7 @@ dockAppOrder.forEach(id => {
   icon.style.left = iconPositions[id].left + 'px';
   icon.style.top = iconPositions[id].top + 'px';
   icon.ondblclick = () => openWindow(id);
-  icon.innerHTML = `<div class="glyph" style="background:${def.dot}">${def.icon}</div><div class="label">${def.title}</div>`;
+  icon.innerHTML = `<div class="glyph" style="--tag-color:${def.dot}">${def.svgIcon || def.icon}</div><div class="label">${def.title}</div>`;
   iconsEl.appendChild(icon);
   makeIconDraggable(icon, id);
 });
@@ -3249,8 +3293,8 @@ function rebuildDock(){
     const dockIcon = document.createElement('div');
     dockIcon.className = 'dock-icon';
     dockIcon.id = 'dock-' + id;
-    dockIcon.style.background = def.dot;
-    dockIcon.innerHTML = `${def.icon}<div class="run-dot"></div>`;
+    dockIcon.style.setProperty('--tag-color', def.dot);
+    dockIcon.innerHTML = `${def.svgIcon || def.icon}<div class="run-dot"></div>`;
     dockIcon.title = def.title;
     dockIcon.onclick = () => { if(openWindows[id] && openWindows[id].style.display !== 'none'){ minimizeWindow(id); } else { openWindow(id); } };
     dockIcon.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); openContextMenuAt(e.clientX, e.clientY, iconMenuHTML(id)); };
@@ -3786,4 +3830,4 @@ restartMascotLoop();
 </script>
 
 </body>
-  </html>
+</html>
